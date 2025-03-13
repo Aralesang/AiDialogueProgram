@@ -1,0 +1,11 @@
+{
+  "tasks": {
+    "start": "deno run --allow-net --allow-read --allow-write --allow-env server.ts",
+    "dev": "deno run --watch --allow-net --allow-read --allow-write --allow-env server.ts"
+  },
+  "imports": {
+    "oak": "https://deno.land/x/oak@v12.6.1/mod.ts",
+    "websocket": "https://deno.land/x/websocket@v0.1.4/mod.ts",
+    "openai": "https://deno.land/x/openai@v4.69.0/mod.ts"
+  }
+}
