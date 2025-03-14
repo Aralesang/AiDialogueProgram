@@ -1,57 +1,32 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Dialogue System</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <div class="container">
-        <div class="sidebar">
-            <div class="history-controls">
-                <input type="text" id="historyName" placeholder="对话历史名称">
-                <button id="loadHistory">加载历史</button>
-                <button id="saveHistory">保存历史</button>
-            </div>
-            <div class="history-list" id="historyList"></div>
-        </div>
-        <div class="main-content">
-            <div class="chat-container" id="chatContainer"></div>
-            <div class="input-container">
-                <div class="file-upload">
-                    <label for="imageUpload" class="upload-label">
-                        📎 上传图片
-                    </label>
-                    <input type="file" id="imageUpload" accept="image/*" style="display: none;">
-                </div>
-                <textarea id="messageInput" placeholder="输入消息..."></textarea>
-                <button id="sendButton">发送</button>
-            </div>
-        </div>
-    </div>
-    <script src="uploadUtils.js" type="module"></script>
-    <script src="main.js" type="module"></script>
-</body>
-</html>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Dialogue System</title>
+    <title>智能对话助手</title>
     <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
         <div class="sidebar">
             <div class="user-info">
-                <span id="username"></span>
-                <button id="logoutButton" class="logout-button">登出</button>
+                <span id="username">👋 欢迎回来</span>
+                <!-- <button id="logoutButton" class="logout-button">
+                    <span>退出</span>
+                </button> -->
             </div>
-            <div class="new-chat">
-                <button id="newChatButton">新对话</button>
+            <div class="history-controls">
+                <input type="text" id="historyName" placeholder="✨ 为对话命名">
+                <div class="buttons-container">
+                    <button id="loadHistory">
+                        <span>📂 加载(未实装)</span>
+                    </button>
+                    <button id="saveHistory">
+                        <span>💾 保存(未实装)</span>
+                    </button>
+                </div>
             </div>
             <div class="history-list" id="historyList">
                 <!-- 历史记录将在这里动态添加 -->
@@ -59,14 +34,26 @@
         </div>
         <div class="main-content">
             <div class="chat-container" id="chatContainer">
-                <!-- 对话内容将在这里动态添加 -->
+                <div class="system-notification">
+                    ✨ 欢迎使用智能对话助手，让我们开始愉快的对话吧！
+                </div>
             </div>
             <div class="input-container">
-                <textarea id="userInput" placeholder="输入你的问题..."></textarea>
-                <button id="sendButton">发送</button>
+                <div class="file-upload">
+                    <label for="imageUpload" class="upload-label">
+                        <span>🖼️ 上传图片</span>
+                    </label>
+                    <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+                </div>
+                <textarea id="messageInput" placeholder="输入你的问题..."></textarea>
+                <button id="sendButton">
+                    <span>发送</span>
+                    <span>🚀</span>
+                </button>
             </div>
         </div>
     </div>
-    <script src="main.js"></script>
+    <script src="uploadUtils.js" type="module"></script>
+    <script src="main.js" type="module"></script>
 </body>
 </html>

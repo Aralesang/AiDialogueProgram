@@ -1,4 +1,4 @@
-import { uploadImage, getExpiredAt } from './uploadUtils.js';
+import { uploadImage } from './uploadUtils.js';
 
 // WebSocket 连接
 const ws = new WebSocket('ws://localhost:3000/ws');
@@ -114,7 +114,7 @@ function appendSystemMessage(message, status) {
         if(status === 'system'){
             iconSpan.textContent = '💡';
         }else if (status === 'start'){
-            iconSpan.textContent = '🤖';
+            iconSpan.textContent = '🐰';
         }else if (status === 'error'){
             iconSpan.textContent = '❌';
         }
@@ -295,9 +295,9 @@ imageUpload.addEventListener('change', async (e) => {
 function updateImagePreview() {
     const label = document.querySelector('.upload-label');
     if (selectedImage) {
-        label.textContent = '📎 ' + selectedImage.name;
+        label.innerHTML = '<span>📎 已选择图片</span>';
     } else {
-        label.textContent = '📎 上传图片';
+        label.innerHTML = '<span>🖼️ 上传图片</span>';
     }
 }
 
@@ -357,7 +357,7 @@ function startNewResponse() {
     // 添加AI图标和加载动画
     const iconSpan = document.createElement('span');
     iconSpan.className = 'ai-icon';
-    iconSpan.textContent = '🤖';
+    iconSpan.textContent = '🐰';
     contentDiv.appendChild(iconSpan);
     
     // 添加打字动画容器
