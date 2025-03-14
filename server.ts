@@ -69,10 +69,13 @@ router.get("/ws", async (ctx) => {
                     break;
 
                 case "load_history":
+                    console.log("加载历史记录", data.username);
+                    
                     await context.dialogueEngine.load_history(data.historyName);
                     socket.send(JSON.stringify({
                         type: "history_loaded",
                         history: context.dialogueEngine.history,
+                        username: data.username,
                     }));
                     break;
 

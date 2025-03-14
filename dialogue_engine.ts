@@ -1,5 +1,4 @@
 import { OpenAI } from "https://deno.land/x/openai@v4.69.0/mod.ts";
-import { uploadImage } from "./update_file.ts"
 import { API_CONFIG } from "./config.ts";
 
 // 初始化OpenAI客户端（仅用于OpenAI模式）
@@ -44,6 +43,8 @@ export default class DialogueEngine {
     /** 推理内容缓存 */
     public reasoning_message = "";
     private exe_path = this.get_exe_path();
+    /** 用户名 */
+    username = "default_user";
 
     public get_exe_path() {
         // let path = Deno.execPath();
@@ -54,7 +55,7 @@ export default class DialogueEngine {
 
     /** 获取历史记录文件路径 */
     public get_history_path() {
-        return this.exe_path + "/history/" + this.historyFileName + ".json";
+        return this.exe_path + "/history/" + this.username + "/" + this.historyFileName + ".json";
     }
 
     public get_api_config() {

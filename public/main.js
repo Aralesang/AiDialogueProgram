@@ -98,7 +98,8 @@ function sendMessage() {
     ws.send(JSON.stringify({
         type: 'chat',
         message: message,
-        image: selectedImage
+        image: selectedImage,
+        username: username
     }));
 
     // 显示用户消息
@@ -337,7 +338,8 @@ loadHistory.addEventListener('click', () => {
     if (name) {
         ws.send(JSON.stringify({
             type: 'load_history',
-            historyName: name
+            historyName: name,
+            username: username
         }));
     }
 });
@@ -347,7 +349,8 @@ saveHistory.addEventListener('click', () => {
     if (name) {
         ws.send(JSON.stringify({
             type: 'save_history',
-            historyName: name
+            historyName: name,
+            username: username
         }));
     }
 });
