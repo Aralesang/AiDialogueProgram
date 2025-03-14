@@ -1,3 +1,5 @@
+import { uploadImage, getExpiredAt } from './uploadUtils.js';
+
 // WebSocket 连接
 const ws = new WebSocket('ws://localhost:3000/ws');
 let selectedImage = null;
@@ -97,7 +99,7 @@ let isResponseInProgress = false;
 // 添加或更新系统消息
 function appendSystemMessage(message, status) {
     // 如果是开始新的回复
-    if (status === 'start' || status === 'system') {
+    if (status === 'start' || status === 'system' || status === 'error') {
         // 创建新的系统消息容器
         currentResponseMessage = document.createElement('div');
         currentResponseMessage.className = 'message system-message';
@@ -110,9 +112,11 @@ function appendSystemMessage(message, status) {
         const iconSpan = document.createElement('span');
         iconSpan.className = 'ai-icon';
         if(status === 'system'){
-            iconSpan.textContent = '📎';
-        }else{
+            iconSpan.textContent = '💡';
+        }else if (status === 'start'){
             iconSpan.textContent = '🤖';
+        }else if (status === 'error'){
+            iconSpan.textContent = '❌';
         }
         contentDiv.appendChild(iconSpan);
         
@@ -251,11 +255,39 @@ function loadHistoryMessages(history) {
 }
 
 // 图片上传处理
-imageUpload.addEventListener('change', (e) => {
+imageUpload.addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (file && file.type.startsWith('image/')) {
-        selectedImage = file;
-        updateImagePreview();
+        try {
+            // 显示上传中状态
+            const label = document.querySelector('.upload-label');
+            label.textContent = '📤 上传中...';
+            
+            // 创建FormData对象
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            // 发送图片到上传服务器
+            const result = await uploadImage(file);
+            
+            if (!result || result.success === false) {
+                appendSystemMessage(result.error, 'error');
+                throw new Error('上传失败');
+            }
+            console.log('上传成功:', result.url);
+            selectedImage = {
+                file: file,
+                url: result.url
+            };
+            
+            // 更新上传按钮状态
+            label.textContent = '✅ 已选择图片';
+        } catch (error) {
+            console.error('图片上传错误:', error);
+            const label = document.querySelector('.upload-label');
+            label.textContent = '❌ 上传失败';
+            selectedImage = null;
+        }
     }
 });
 
