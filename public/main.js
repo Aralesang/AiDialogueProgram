@@ -28,7 +28,7 @@ ws.onerror = (error) => {
     console.error('WebSocket 错误:', error);
     appendSystemMessage('连接发生错误，请检查网络后重试。', 'system');
 };
-
+let all_message = "";
 ws.onmessage = (event) => {
     const data = JSON.parse(event.data);
     
@@ -40,10 +40,13 @@ ws.onmessage = (event) => {
             } else if (data.message === 'END_ANSWER') {
                 // 结束当前回复
                 endResponse();
+                console.log(all_message);
+                all_message = "";
             } else {
                 // 继续添加回复内容
                 if (isResponseInProgress) {
                     appendSystemMessage(data.message);
+                    all_message += data.message;
                 }
             }
             break;
@@ -130,13 +133,6 @@ function appendSystemMessage(message, status) {
         isResponseInProgress = true;
     }
     
-    // 更新消息内容
-    if (currentResponseMessage && (status === 'start' || status === 'continue')) {
-        const textSpan = currentResponseMessage.querySelector('.message-text');
-        textSpan.textContent += message;
-        textSpan.style.whiteSpace = 'pre-wrap'; // 确保文本自动换行
-    }
-    
     // 如果是结束回复
     if (status === 'end') {
         isResponseInProgress = false;
@@ -217,6 +213,11 @@ function endReasoning() {
         currentReasoningMessage = null;
         scrollToBottom();
     }
+}
+
+//开始推理过程
+function startNewReasoning(){
+
 }
 
 // 添加用户消息
