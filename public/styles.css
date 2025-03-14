@@ -6,14 +6,14 @@
 }
 
 :root {
-    --primary-color: #7bb5e3;
-    --primary-light: #a8d0f0;
-    --primary-dark: #5aafd1;
-    --bg-color: #f0f7ff;
+    --primary-color: #89CFF0;
+    --primary-light: #B0E2FF;
+    --primary-dark: #89CFF0;
+    --bg-color: #F0F8FF;
     --text-color: #2c3e50;
-    --border-color: #d1e6f9;
-    --hover-color: #6aa4d8;
-    --shadow-color: rgba(123, 181, 227, 0.2);
+    --border-color: #CCE6FF;
+    --hover-color: #89CFF0;
+    --shadow-color: rgba(137, 207, 240, 0.2);
 }
 
 body {
@@ -37,7 +37,7 @@ body {
 }
 
 .sidebar {
-    background: linear-gradient(135deg, #f5f9ff 0%, #edf4ff 100%);
+    background: linear-gradient(135deg, #F3FCFF 0%, #E5F6FF 100%);
     border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
