@@ -130,6 +130,7 @@ function appendSystemMessage(message, status) {
     if (currentResponseMessage && (status === 'start' || status === 'continue')) {
         const textSpan = currentResponseMessage.querySelector('.message-text');
         textSpan.textContent += message;
+        textSpan.style.whiteSpace = 'pre-wrap'; // 确保文本自动换行
     }
     
     // 如果是结束回复
@@ -221,6 +222,7 @@ function appendUserMessage(message, image = null) {
     
     if (message) {
         messageDiv.textContent = message;
+        messageDiv.style.whiteSpace = 'pre-wrap'; // 确保文本自动换行
     }
     
     if (image) {
