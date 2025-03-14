@@ -104,13 +104,26 @@ router.get("/ws", async (ctx) => {
 
 // 静态文件服务
 app.use(async (context, next) => {
-    try {
-        await context.send({
-            root: `${Deno.cwd()}/public`,
-            index: "index.html",
-        });
-    } catch {
-        await next();
+    const path = context.request.url.pathname;
+    
+    // 如果是根路径或index.html，检查是否需要重定向到登录页面
+    if (path === '/' || path === '/index.html') {
+        try {
+            await context.send({
+                root: `${Deno.cwd()}/public`,
+                index: "index.html",
+            });
+        } catch {
+            await next();
+        }
+    } else {
+        try {
+            await context.send({
+                root: `${Deno.cwd()}/public`,
+            });
+        } catch {
+            await next();
+        }
     }
 });
 
