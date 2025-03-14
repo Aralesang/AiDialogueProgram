@@ -71,11 +71,10 @@ export default class DialogueEngine {
     }
 
     /** 处理图像请求 */
-    public async handleImageRequest(input_message: string, img_path: string) {
+    public async handleImageRequest(input_message: string, url: string) {
         openai.apiKey = API_CONFIG.img_model.apiKey;
         openai.baseURL = API_CONFIG.img_model.baseURL;
-        const url = await uploadImage(img_path);
-        //console.log("获取到外链:", url);
+        console.log("获取到外链:", url);
 
         const completion = await openai.chat.completions.create({
             model: API_CONFIG.img_model.model,
@@ -260,17 +259,17 @@ export default class DialogueEngine {
         }
     }
 
-    public async sendRequest(input: string, image_path: string) {
+    public async sendRequest(input: string, img_url: string) {
         // 重置状态
         this.isReasoningMode = false;
         this.isFirstContent = true;
         this.system_message = "";  // 重置系统消息
         const message = this.buildMessage(input);
         //检查是否为图片请求
-        if (image_path == "") {
+        if (img_url == "") {
             await this.handleOpenAIRequest(message);
         } else {
-            await this.handleImageRequest(input, image_path);
+            await this.handleImageRequest(input, img_url);
         }
 
         // 确保推理模式已结束
