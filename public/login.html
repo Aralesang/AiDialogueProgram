@@ -5,43 +5,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>登录 - 智能对话助手</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="login.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="login-container">
+        <div class="floating-elements">
+            <span class="float-item">🌟</span>
+            <span class="float-item">✨</span>
+            <span class="float-item">🎀</span>
+            <span class="float-item">🌸</span>
+            <span class="float-item">💫</span>
+            <span class="float-item">🦋</span>
+            <span class="float-item">🍥</span>
+            <span class="float-item">🎭</span>
+        </div>
         <div class="login-box">
-            <h1>🤖 智能对话助手</h1>
-            <p class="login-subtitle">请输入用户名开始对话</p>
+            <div class="login-header">
+                <div class="avatar-container">
+                    <div class="avatar">🤖</div>
+                </div>
+                <h1>智能对话助手</h1>
+                <p class="login-subtitle">✨ 开启智趣对话之旅 ✨</p>
+            </div>
             <form id="loginForm" class="login-form">
-                <input type="text" id="username" placeholder="输入用户名..." required>
-                <button type="submit">开始对话 🚀</button>
+                <div class="input-group">
+                    <span class="input-icon">👤</span>
+                    <input type="text" id="username" placeholder="请输入你的名字..." required>
+                </div>
+                <button type="submit">
+                    <span class="button-text">开始对话</span>
+                    <span class="button-icon">🚀</span>
+                </button>
             </form>
+            <div class="login-footer">
+                <div class="decoration-line"></div>
+                <span class="welcome-text">欢迎来到AI对话空间</span>
+                <div class="decoration-line"></div>
+            </div>
         </div>
     </div>
-    <script>
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const username = document.getElementById('username').value.trim();
-            
-            if (!username) {
-                alert('请输入用户名');
-                return;
-            }
-
-            // 保存用户名到 localStorage
-            localStorage.setItem('username', username);
-            // 跳转到主页
-            window.location.href = '/';
-        });
-
-        // 检查是否已登录
-        window.addEventListener('load', () => {
-            const username = localStorage.getItem('username');
-            if (username) {
-                window.location.href = '/';
-            }
-        });
-    </script>
+    <script src="login.js"></script>
 </body>
 </html>

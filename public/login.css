@@ -1,0 +1,269 @@
+
+/* 登录页面样式 */
+:root {
+    --primary-color: #9EE4FF;
+    --primary-light: #87CEEB;
+    --primary-dark: #87CEEB;
+    --secondary-color: #87CEEB;
+    --bg-color: #f3fcff;
+    --text-color: #87CEEB;
+    --border-color: #c1d9ed;
+    --hover-color: #87CEEB;
+    --shadow-color: rgba(255, 158, 205, 0.2);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+    color: var(--text-color);
+}
+
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #E6F0FF 0%, #c1d9ed 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.login-box {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 3rem;
+    border-radius: 30px;
+    box-shadow: 0 8px 32px rgba(137, 207, 240, 0.3);
+    text-align: center;
+    width: 100%;
+    max-width: 420px;
+    animation: loginBoxFadeIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    position: relative;
+    z-index: 1;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.login-header {
+    margin-bottom: 2.5rem;
+}
+
+.avatar-container {
+    margin-bottom: 1.5rem;
+}
+
+.avatar {
+    width: 90px;
+    height: 90px;
+    background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 100%);
+    border-radius: 50%;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    animation: avatarPop 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    box-shadow: 0 4px 20px rgba(158, 208, 255, 0.4);
+    border: 4px solid white;
+}
+
+.login-box h1 {
+    color: var(--text-color);
+    margin-bottom: 0.8rem;
+    font-size: 2.2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.login-subtitle {
+    color: var(--text-color);
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+    opacity: 0.8;
+    letter-spacing: 0.5px;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 1.2rem;
+    font-size: 1.3rem;
+    color: var(--primary-color);
+    animation: iconWiggle 3s infinite;
+}
+
+.login-form input {
+    width: 100%;
+    padding: 1.2rem 1.2rem 1.2rem 3.5rem;
+    border: 2px solid var(--border-color);
+    border-radius: 20px;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.login-form input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 20px rgba(123, 181, 227, 0.3);
+    transform: translateY(-2px);
+}
+
+.login-form button {
+    padding: 1.2rem;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+}
+
+.login-form button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(158, 208, 255, 0.4);
+}
+
+.button-text {
+    letter-spacing: 1px;
+}
+
+.button-icon {
+    font-size: 1.3rem;
+    transition: transform 0.3s ease;
+}
+
+.login-form button:hover .button-icon {
+    transform: translateX(5px) rotate(15deg);
+}
+
+.login-footer {
+    margin-top: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.decoration-line {
+    height: 1px;
+    flex: 1;
+    background: linear-gradient(to right, transparent, var(--primary-light), transparent);
+}
+
+.welcome-text {
+    color: var(--primary-color);
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.floating-elements {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.float-item {
+    position: absolute;
+    font-size: 1.8rem;
+    animation: float 8s infinite;
+    opacity: 0.7;
+}
+
+.float-item:nth-child(1) { top: 15%; left: 15%; animation-delay: 0s; }
+.float-item:nth-child(2) { top: 75%; left: 75%; animation-delay: 1s; }
+.float-item:nth-child(3) { top: 35%; left: 80%; animation-delay: 2s; }
+.float-item:nth-child(4) { top: 85%; left: 25%; animation-delay: 3s; }
+.float-item:nth-child(5) { top: 25%; left: 45%; animation-delay: 4s; }
+.float-item:nth-child(6) { top: 55%; left: 35%; animation-delay: 5s; }
+.float-item:nth-child(7) { top: 65%; left: 85%; animation-delay: 6s; }
+.float-item:nth-child(8) { top: 45%; left: 65%; animation-delay: 7s; }
+
+/* 动画关键帧 */
+@keyframes loginBoxFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes avatarPop {
+    0% {
+        transform: scale(0) rotate(-180deg);
+    }
+    70% {
+        transform: scale(1.2) rotate(20deg);
+    }
+    100% {
+        transform: scale(1) rotate(0);
+    }
+}
+
+@keyframes iconWiggle {
+    0%, 100% { transform: rotate(0); }
+    25% { transform: rotate(-10deg); }
+    75% { transform: rotate(10deg); }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0) rotate(0);
+    }
+    50% {
+        transform: translateY(-20px) rotate(10deg);
+    }
+}
+
+/* 响应式设计 */
+@media (max-width: 480px) {
+    .login-box {
+        margin: 1rem;
+        padding: 2rem;
+    }
+
+    .login-box h1 {
+        font-size: 1.8rem;
+    }
+
+    .avatar {
+        width: 80px;
+        height: 80px;
+        font-size: 2.5rem;
+    }
+
+    .login-form input,
+    .login-form button {
+        padding: 1rem;
+        font-size: 1rem;
+    }
+}
