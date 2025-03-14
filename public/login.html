@@ -1,0 +1,47 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - 智能对话助手</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <h1>🤖 智能对话助手</h1>
+            <p class="login-subtitle">请输入用户名开始对话</p>
+            <form id="loginForm" class="login-form">
+                <input type="text" id="username" placeholder="输入用户名..." required>
+                <button type="submit">开始对话 🚀</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            
+            if (!username) {
+                alert('请输入用户名');
+                return;
+            }
+
+            // 保存用户名到 localStorage
+            localStorage.setItem('username', username);
+            // 跳转到主页
+            window.location.href = '/';
+        });
+
+        // 检查是否已登录
+        window.addEventListener('load', () => {
+            const username = localStorage.getItem('username');
+            if (username) {
+                window.location.href = '/';
+            }
+        });
+    </script>
+</body>
+</html>
