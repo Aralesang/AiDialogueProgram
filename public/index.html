@@ -33,3 +33,39 @@
     <script src="main.js"></script>
 </body>
 </html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Dialogue System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="user-info">
+                <span id="username"></span>
+                <button id="logoutButton" class="logout-button">登出</button>
+            </div>
+            <div class="new-chat">
+                <button id="newChatButton">新对话</button>
+            </div>
+            <div class="history-list" id="historyList">
+                <!-- 历史记录将在这里动态添加 -->
+            </div>
+        </div>
+        <div class="main-content">
+            <div class="chat-container" id="chatContainer">
+                <!-- 对话内容将在这里动态添加 -->
+            </div>
+            <div class="input-container">
+                <textarea id="userInput" placeholder="输入你的问题..."></textarea>
+                <button id="sendButton">发送</button>
+            </div>
+        </div>
+    </div>
+    <script src="main.js"></script>
+</body>
+</html>
