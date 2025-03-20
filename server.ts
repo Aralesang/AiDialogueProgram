@@ -64,8 +64,11 @@ router.get("/ws", async (ctx) => {
 
             // 处理不同类型的消息
             switch (data.type) {
+                case "img":
+                    await context.dialogueEngine.sendImgRequest(data.message, data.image);
+                    break;
                 case "chat":
-                    await context.dialogueEngine.sendRequest(data.message, data.image || "");
+                    await context.dialogueEngine.sendRequest(data.message);
                     break;
 
                 case "load_history":

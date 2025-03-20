@@ -260,19 +260,41 @@ export default class DialogueEngine {
         }
     }
 
-    public async sendRequest(input: string, img_url: string) {
+    public async sendImgRequest(input: string, url: string) {
         // 重置状态
         this.isReasoningMode = false;
         this.isFirstContent = true;
         this.system_message = "";  // 重置系统消息
         const message = this.buildMessage(input);
-        //检查是否为图片请求
-        if (img_url == "") {
-            await this.handleOpenAIRequest(message);
-        } else {
-            await this.handleImageRequest(input, img_url);
+        await this.handleImageRequest(message, url);
+        // 确保推理模式已结束
+        if (this.isReasoningMode) {
+            this.endReasoning();
+            this.isReasoningMode = false;
         }
 
+        // 结束回复
+        if (!this.isFirstContent) {
+            this.endAnswer();
+            // 等待一小段时间确保消息被发送
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+
+        this.round++;
+        this.update_history(input, this.system_message);
+
+        // 通知对话完成
+        if (this.onDialogueComplete) {
+            this.onDialogueComplete();
+        }
+    }
+    public async sendRequest(input: string) {
+        // 重置状态
+        this.isReasoningMode = false;
+        this.isFirstContent = true;
+        this.system_message = "";  // 重置系统消息
+        const message = this.buildMessage(input);
+        await this.handleOpenAIRequest(message);
         // 确保推理模式已结束
         if (this.isReasoningMode) {
             this.endReasoning();

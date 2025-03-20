@@ -1,4 +1,5 @@
-const API_URL = "http://zm-99.com:8000/upload";
+const API_URL = "http://101.43.40.88:8000/upload";
+//const API_URL = "http://127.0.0.1:8000/upload";
 // 文件上传函数
 async function uploadImage(file) {
     const formData = new FormData();
@@ -18,8 +19,8 @@ async function uploadImage(file) {
         }
 
         const result = await response.json();
-        if (result.status === 200) {
-            return result.url;
+        if (result.url && result.url != "" || result.status === 200) {
+            return result;
         } else {
             throw new Error(result.message || "Upload failed");
         }

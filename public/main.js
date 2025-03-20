@@ -17,7 +17,6 @@ document.getElementById('logoutButton').addEventListener('click', () => {
 
 // WebSocket 连接
 const ws = new WebSocket('ws://localhost:3000/ws');
-let selectedImage = null;
 
 // DOM 元素
 const chatContainer = document.getElementById('chatContainer');
@@ -46,7 +45,7 @@ ws.onerror = (error) => {
 let all_message = "";
 ws.onmessage = (event) => {
     const data = JSON.parse(event.data);
-    
+
     switch (data.type) {
         case 'response':
             if (data.message === 'START_ANSWER') {
@@ -92,23 +91,34 @@ ws.onmessage = (event) => {
 // 发送消息
 function sendMessage() {
     const message = messageInput.value.trim();
-    if (!message && !selectedImage) return;
+    if (!message) return;
 
     // 发送消息到服务器
     ws.send(JSON.stringify({
         type: 'chat',
         message: message,
-        image: selectedImage,
+        image: "",
         username: username
     }));
 
     // 显示用户消息
-    appendUserMessage(message, selectedImage);
+    appendUserMessage(message, "");
 
     // 清空输入
     messageInput.value = '';
-    selectedImage = null;
-    updateImagePreview();
+}
+
+function sendImage(image) {
+    // 发送消息到服务器
+    ws.send(JSON.stringify({
+        type: 'img',
+        message: "首先请告诉我你看到了什么,然后详细描述图片上的内容，如果图片的内容关联到了某些影视,文学,电子游戏等其他可能的内容,也请告知",
+        image: image,
+        username: username
+    }));
+
+    // 显示用户消息
+    appendUserMessage("", image);
 }
 
 // 当前系统回复的DOM元素
@@ -122,33 +132,33 @@ function appendSystemMessage(message, status) {
         // 创建新的系统消息容器
         currentResponseMessage = document.createElement('div');
         currentResponseMessage.className = 'message system-message';
-        
+
         // 创建系统回复内容容器
         const contentDiv = document.createElement('div');
         contentDiv.className = 'system-content';
-        
+
         // 添加AI图标
         const iconSpan = document.createElement('span');
         iconSpan.className = 'ai-icon';
-        if(status === 'system'){
+        if (status === 'system') {
             iconSpan.textContent = '💡';
-        }else if (status === 'start'){
+        } else if (status === 'start') {
             iconSpan.textContent = '🐰';
-        }else if (status === 'error'){
+        } else if (status === 'error') {
             iconSpan.textContent = '❌';
         }
         contentDiv.appendChild(iconSpan);
-        
+
         // 创建消息文本容器
         const textSpan = document.createElement('span');
         textSpan.className = 'message-text';
         currentResponseMessage.appendChild(contentDiv);
         contentDiv.appendChild(textSpan);
-        
+
         chatContainer.appendChild(currentResponseMessage);
         isResponseInProgress = true;
     }
-    
+
     // 如果是结束回复
     if (status === 'end') {
         isResponseInProgress = false;
@@ -158,21 +168,21 @@ function appendSystemMessage(message, status) {
     if (!currentResponseMessage || !isResponseInProgress) {
         startNewResponse();
     }
-    
+
     const textSpan = currentResponseMessage.querySelector('.message-text');
     const typingContainer = currentResponseMessage.querySelector('.typing-container');
-    
+
     // 更新文本内容
     textSpan.textContent += message;
-    
+
     // 确保打字动画容器在文本之后
     if (typingContainer) {
         typingContainer.remove();
         const contentDiv = currentResponseMessage.querySelector('.system-content');
         contentDiv.appendChild(typingContainer);
     }
-    
-    
+
+
     scrollToBottom();
 }
 
@@ -193,18 +203,18 @@ function appendReasoningMessage(message) {
         // 创建新的推理消息容器
         currentReasoningMessage = document.createElement('div');
         currentReasoningMessage.className = 'message reasoning-message';
-        
+
         // 添加开始提示
         const startIndicator = document.createElement('div');
         startIndicator.className = 'reasoning-indicator';
         startIndicator.textContent = '🤔 开始思考...';
         currentReasoningMessage.appendChild(startIndicator);
-        
+
         // 创建推理内容容器
         const contentDiv = document.createElement('div');
         contentDiv.className = 'reasoning-content';
         currentReasoningMessage.appendChild(contentDiv);
-        
+
         chatContainer.appendChild(currentReasoningMessage);
         isReasoningInProgress = true;
     }
@@ -223,7 +233,7 @@ function endReasoning() {
         endIndicator.className = 'reasoning-indicator';
         endIndicator.textContent = '✨ 思考完成';
         currentReasoningMessage.appendChild(endIndicator);
-        
+
         // 重置状态
         isReasoningInProgress = false;
         currentReasoningMessage = null;
@@ -232,7 +242,7 @@ function endReasoning() {
 }
 
 //开始推理过程
-function startNewReasoning(){
+function startNewReasoning() {
 
 }
 
@@ -240,18 +250,18 @@ function startNewReasoning(){
 function appendUserMessage(message, image = null) {
     const messageDiv = document.createElement('div');
     messageDiv.className = 'message user-message';
-    
+
     if (message) {
         messageDiv.textContent = message;
         messageDiv.style.whiteSpace = 'pre-wrap'; // 确保文本自动换行
     }
-    
+
     if (image) {
         const img = document.createElement('img');
-        img.src = URL.createObjectURL(image);
+        img.src = image;
         messageDiv.appendChild(img);
     }
-    
+
     chatContainer.appendChild(messageDiv);
     scrollToBottom();
 }
@@ -279,44 +289,29 @@ imageUpload.addEventListener('change', async (e) => {
             // 显示上传中状态
             const label = document.querySelector('.upload-label');
             label.textContent = '📤 上传中...';
-            
+
             // 创建FormData对象
             const formData = new FormData();
             formData.append('file', file);
-            
+
             // 发送图片到上传服务器
             const result = await uploadImage(file);
-            
-            if (!result || result.success === false) {
+
+            if (!result) {
                 appendSystemMessage(result.error, 'error');
                 throw new Error('上传失败');
             }
             console.log('上传成功:', result.url);
-            selectedImage = {
-                file: file,
-                url: result.url
-            };
-            
+            sendImage(result.url);
             // 更新上传按钮状态
-            label.textContent = '✅ 已选择图片';
+            label.textContent = '🖼️ 上传图片';
         } catch (error) {
             console.error('图片上传错误:', error);
             const label = document.querySelector('.upload-label');
             label.textContent = '❌ 上传失败';
-            selectedImage = null;
         }
     }
 });
-
-// 更新图片预览
-function updateImagePreview() {
-    const label = document.querySelector('.upload-label');
-    if (selectedImage) {
-        label.innerHTML = '<span>📎 已选择图片</span>';
-    } else {
-        label.innerHTML = '<span>🖼️ 上传图片</span>';
-    }
-}
 
 // 滚动到底部
 function scrollToBottom() {
@@ -364,21 +359,21 @@ function startNewResponse() {
     if (currentResponseMessage && isResponseInProgress) {
         endResponse();
     }
-    
+
     // 创建新的系统消息容器
     currentResponseMessage = document.createElement('div');
     currentResponseMessage.className = 'message system-message';
-    
+
     // 创建系统回复内容容器
     const contentDiv = document.createElement('div');
     contentDiv.className = 'system-content';
-    
+
     // 添加AI图标和加载动画
     const iconSpan = document.createElement('span');
     iconSpan.className = 'ai-icon';
     iconSpan.textContent = '🐰';
     contentDiv.appendChild(iconSpan);
-    
+
     // 添加打字动画容器
     const typingContainer = document.createElement('div');
     typingContainer.className = 'typing-container';
@@ -387,12 +382,12 @@ function startNewResponse() {
     typingDots.innerHTML = '<span>.</span><span>.</span><span>.</span>';
     typingContainer.appendChild(typingDots);
     contentDiv.appendChild(typingContainer);
-    
+
     // 创建消息文本容器
     const textSpan = document.createElement('span');
     textSpan.className = 'message-text';
     contentDiv.appendChild(textSpan);
-    
+
     currentResponseMessage.appendChild(contentDiv);
     chatContainer.appendChild(currentResponseMessage);
     isResponseInProgress = true;
@@ -406,14 +401,14 @@ function endResponse() {
         if (typingContainer) {
             typingContainer.remove();
         }
-        
+
         // 添加完成动画
         const completionMark = document.createElement('span');
         completionMark.className = 'completion-mark';
         completionMark.textContent = '✓';
         currentResponseMessage.querySelector('.system-content').appendChild(completionMark);
     }
-    
+
     isResponseInProgress = false;
     currentResponseMessage = null;
     scrollToBottom();
