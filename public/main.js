@@ -3,7 +3,7 @@ import { uploadImage } from './uploadUtils.js';
 // 检查登录状态
 const username = localStorage.getItem('username');
 if (!username) {
-    window.location.href = '/login.html';
+    globalThis.location.href = '/login.html';
 }
 
 // 更新用户名显示
@@ -12,7 +12,7 @@ document.getElementById('username').textContent = `👋 ${username}`;
 // 登出功能
 document.getElementById('logoutButton').addEventListener('click', () => {
     localStorage.removeItem('username');
-    window.location.href = '/login.html';
+    globalThis.location.href = '/login.html';
 });
 
 // WebSocket 连接
