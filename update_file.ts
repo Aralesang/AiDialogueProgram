@@ -1,5 +1,6 @@
 // upload.ts
 const API_URL = "http://zm-99.com:8000/upload";
+//const API_URL = "http://127.0.0.1:8000/upload";
 //const IMG_PATH = "/Users/dengxiaolei/Documents/img1.jpg";
 export async function uploadImage(filePath: string) {
   // 1. 读取本地文件
