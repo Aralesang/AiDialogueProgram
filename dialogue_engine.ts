@@ -77,29 +77,47 @@ export default class DialogueEngine {
         openai.baseURL = API_CONFIG.img_model.baseURL;
         console.log("获取到外链:", url);
 
-        const completion = await openai.chat.completions.create({
-            model: API_CONFIG.img_model.model,
-            messages: [
-                {
-                    "role": "user",
-                    "content": [
+        let attempts = 0;
+        let completion = null;
+        let error_message = null;
+        while (attempts < 10) {
+            attempts++;
+            try {
+                completion = await openai.chat.completions.create({
+                    model: API_CONFIG.img_model.model,
+                    messages: [
                         {
-                            "type": "text",
-                            "text": input_message
-                        },
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": url
-                            }
+                            "role": "user",
+                            "content": [
+                                {
+                                    "type": "text",
+                                    "text": input_message
+                                },
+                                {
+                                    "type": "image_url",
+                                    "image_url": {
+                                        "url": url
+                                    }
+                                }
+                            ]
                         }
-                    ]
-                }
-            ],
-            stream: true,
-        });
+                    ],
+                    stream: true,
+                });
+            } catch (error) {
+                console.error("请求失败，第" + attempts + "次重试", error);
+                error_message = error;
+                continue;
+            }
+            console.log("请求成功");
+            break;
+        }
 
-        for await (const chunk of completion) {
+        if (attempts === 50) {
+            throw new Error("请求失败，已达到最大重试次数");
+        }
+
+        for await (const chunk of completion as any) {
             this.processOpenAIChunk(chunk);
         }
     }

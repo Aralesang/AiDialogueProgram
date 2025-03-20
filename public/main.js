@@ -27,6 +27,9 @@ const historyName = document.getElementById('historyName');
 const loadHistory = document.getElementById('loadHistory');
 const saveHistory = document.getElementById('saveHistory');
 
+/** 当前选择的图片 */
+let selectedImage = "";
+
 // WebSocket 事件处理
 ws.onopen = () => {
     console.log('WebSocket 连接已建立');
@@ -88,10 +91,25 @@ ws.onmessage = (event) => {
     }
 };
 
-// 发送消息
+//发送消息
 function sendMessage() {
-    const message = messageInput.value.trim();
+    if (selectedImage) {
+        sendImage(messageInput.value, selectedImage);
+    } else {
+        sendTextMessage(messageInput.value);
+    }
+}
+
+// 发送纯文本消息
+function sendTextMessage(input) {
+    const message = input;
     if (!message) return;
+
+    // 禁用发送按钮和输入框
+    sendButton.disabled = true;
+    sendButton.textContent = '等待回复...';
+    messageInput.disabled = true;
+    messageInput.placeholder = '等待回复...';
 
     // 发送消息到服务器
     ws.send(JSON.stringify({
@@ -108,17 +126,29 @@ function sendMessage() {
     messageInput.value = '';
 }
 
-function sendImage(image) {
+function sendImage(input, image) {
+    // 禁用发送按钮和输入框
+    sendButton.disabled = true;
+    sendButton.textContent = '等待回复...';
+    messageInput.disabled = true;
+    messageInput.placeholder = '等待回复...';
+    if (input == "") {
+        input = "首先请告诉我你看到了什么,然后详细描述图片上的内容，如果图片的内容关联到了某些影视,文学,电子游戏等其他可能的内容,也请告知";
+    }
     // 发送消息到服务器
     ws.send(JSON.stringify({
         type: 'img',
-        message: "首先请告诉我你看到了什么,然后详细描述图片上的内容，如果图片的内容关联到了某些影视,文学,电子游戏等其他可能的内容,也请告知",
+        message: input,
         image: image,
         username: username
     }));
 
     // 显示用户消息
     appendUserMessage("", image);
+    selectedImage = "";
+    // 清空输入
+    messageInput.value = '';
+    updateImagePreview();
 }
 
 // 当前系统回复的DOM元素
@@ -302,9 +332,9 @@ imageUpload.addEventListener('change', async (e) => {
                 throw new Error('上传失败');
             }
             console.log('上传成功:', result.url);
-            sendImage(result.url);
+            selectedImage = result.url;
             // 更新上传按钮状态
-            label.textContent = '🖼️ 上传图片';
+            updateImagePreview();
         } catch (error) {
             console.error('图片上传错误:', error);
             const label = document.querySelector('.upload-label');
@@ -312,6 +342,18 @@ imageUpload.addEventListener('change', async (e) => {
         }
     }
 });
+
+
+// 更新图片预览
+function updateImagePreview() {
+    const label = document.querySelector('.upload-label');
+    if (selectedImage) {
+        label.innerHTML = '<span>📎 已选择图片</span>';
+    } else {
+        label.innerHTML = '<span>🖼️ 上传图片</span>';
+    }
+}
+
 
 // 滚动到底部
 function scrollToBottom() {
@@ -408,6 +450,12 @@ function endResponse() {
         completionMark.textContent = '✓';
         currentResponseMessage.querySelector('.system-content').appendChild(completionMark);
     }
+
+    // 启用发送按钮和输入框
+    sendButton.disabled = false;
+    sendButton.textContent = '发送 🚀';
+    messageInput.disabled = false;
+    messageInput.placeholder = '输入你的问题...';
 
     isResponseInProgress = false;
     currentResponseMessage = null;
