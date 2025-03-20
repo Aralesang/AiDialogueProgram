@@ -8,7 +8,7 @@ export const API_CONFIG = {
     img_model: { //视觉识别模型
         apiKey: "sk-8af3cfddd72b48aaa81662d5772a4965",
         baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1",
-        model: "qwen2.5-vl-72b-instruct"
+        model: "qwen2.5-vl-72b-instruct" // 可用模型: llama3.2-90b-vision-instruct qwen2.5-vl-72b-instruct
     },
     show_reasoning_content: true,// 是否显示推理内容,该配置仅限deepseek-r1模型时有效
     enable_multi_turn: true, // 是否启用多轮对话
