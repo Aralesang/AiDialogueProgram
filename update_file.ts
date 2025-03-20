@@ -41,7 +41,7 @@ export async function uploadImage(filePath: string) {
 }
 
 // 辅助函数：编码普通表单字段
-function encodeMultipartField(boundary: string, name: string, value: string): Uint8Array {
+function _encodeMultipartField(boundary: string, name: string, value: string): Uint8Array {
   const data = [
     `--${boundary}\r\n`,
     `Content-Disposition: form-data; name="${name}"\r\n\r\n`,

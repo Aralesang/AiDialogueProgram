@@ -79,7 +79,6 @@ export default class DialogueEngine {
 
         let attempts = 0;
         let completion = null;
-        let error_message = null;
         while (attempts < 10) {
             attempts++;
             try {
@@ -106,7 +105,6 @@ export default class DialogueEngine {
                 });
             } catch (error) {
                 console.error("请求失败，第" + attempts + "次重试", error);
-                error_message = error;
                 continue;
             }
             console.log("请求成功");
@@ -117,6 +115,7 @@ export default class DialogueEngine {
             throw new Error("请求失败，已达到最大重试次数");
         }
 
+        // deno-lint-ignore no-explicit-any
         for await (const chunk of completion as any) {
             this.processOpenAIChunk(chunk);
         }

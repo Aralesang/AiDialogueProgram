@@ -90,11 +90,12 @@ router.get("/ws", async (ctx) => {
                     }));
                     break;
             }
+        // deno-lint-ignore no-explicit-any
         } catch (error: any) {
             console.error("Error processing message:", error);
             socket.send(JSON.stringify({
                 type: "error",
-                message: error.message,
+                message: error!.message,
             }));
         }
     };
