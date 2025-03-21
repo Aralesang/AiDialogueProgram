@@ -16,7 +16,7 @@ document.getElementById('logoutButton').addEventListener('click', () => {
 });
 
 // WebSocket 连接
-const ws = new WebSocket('ws://localhost:3000/ws');
+const ws = new WebSocket('ws://zm-99.com:3000/ws');
 
 // DOM 元素
 const chatContainer = document.getElementById('chatContainer');
