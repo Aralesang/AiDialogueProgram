@@ -145,7 +145,12 @@ router.get("/ws", async (ctx) => {
                         const historyList = Deno.readDirSync(`./history/${data.username}`);
                         const historyNames: string[] = [];
                         historyList.forEach((file) => {
-                            historyNames.push(file.name);
+                            //去掉.json
+                            let name = file.name;
+                            if (name.endsWith(".json")) {
+                                name = name.substring(0, name.length - 5);
+                            }
+                            historyNames.push(name);
                         });
                         socket.send(JSON.stringify({
                             type: "history_list",
