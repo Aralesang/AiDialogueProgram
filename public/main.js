@@ -27,6 +27,10 @@ function connectWebSocket() {
     ws.onopen = () => {
         console.log('WebSocket 连接已建立');
         appendSystemMessage('系统已连接，可以开始对话了。', 'system');
+        //获取历史记录列表
+        setTimeout(() => {
+            getHistoryList();
+        }, 1000);
     };
 
     ws.onclose = () => {
@@ -77,6 +81,9 @@ function connectWebSocket() {
                 break;
             case 'history_saved':
                 appendSystemMessage('对话历史已保存。', 'start');
+                break;
+            case 'history_list':
+                console.log(data.historyNames);
                 break;
             case 'error':
                 appendSystemMessage('错误: ' + data.message, 'start');
@@ -146,6 +153,15 @@ function sendTextMessage(input) {
 
     // 清空输入
     messageInput.value = '';
+}
+
+function getHistoryList(){
+    console.log("请求历史记录");
+    
+    ws.send(JSON.stringify({
+        type: 'history_list',
+        username: username
+    }));
 }
 
 function sendImage(input, image) {
