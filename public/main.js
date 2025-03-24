@@ -15,8 +15,78 @@ document.getElementById('logoutButton').addEventListener('click', () => {
     globalThis.location.href = '/login.html';
 });
 
+//获取目录下的json配置文件
+const config_res = await fetch('./config.json');
+const config = await config_res.json();
 // WebSocket 连接
-const ws = new WebSocket('ws://101.43.40.88:3000/ws');
+let ws = new WebSocket(`ws://${config.host}:${config.port}/ws`);
+
+function connectWebSocket() {
+    ws = new WebSocket(`ws://${config.host}:${config.port}/ws`);
+
+    ws.onopen = () => {
+        console.log('WebSocket 连接已建立');
+        appendSystemMessage('系统已连接，可以开始对话了。', 'system');
+    };
+
+    ws.onclose = () => {
+        console.log('WebSocket 连接已关闭');
+        //appendSystemMessage('系统连接已断开，请刷新页面重试。', 'system');
+    };
+
+    ws.onerror = (error) => {
+        console.error('WebSocket 错误:', error);
+        appendSystemMessage('连接发生错误，请检查网络后重试。', 'system');
+    };
+
+    ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+
+        switch (data.type) {
+            case 'response':
+                if (data.message === 'START_ANSWER') {
+                    // 开始新的回复
+                    startNewResponse();
+                } else if (data.message === 'END_ANSWER') {
+                    // 结束当前回复
+                    endResponse();
+                    console.log(all_message);
+                    all_message = "";
+                } else {
+                    // 继续添加回复内容
+                    if (isResponseInProgress) {
+                        appendSystemMessage(data.message);
+                        all_message += data.message;
+                    }
+                }
+                break;
+            case 'reasoning':
+                if (data.message === 'START_REASONING') {
+                    // 开始新的推理
+                    startNewReasoning();
+                } else if (data.message === 'END_REASONING') {
+                    // 结束当前推理
+                    endReasoning();
+                } else {
+                    // 继续添加推理内容
+                    appendReasoningMessage(data.message);
+                }
+                break;
+            case 'history_loaded':
+                loadHistoryMessages(data.history);
+                break;
+            case 'history_saved':
+                appendSystemMessage('对话历史已保存。', 'start');
+                break;
+            case 'error':
+                appendSystemMessage('错误: ' + data.message, 'start');
+                break;
+        }
+    };
+}
+
+// 初始连接
+connectWebSocket();
 
 // DOM 元素
 const chatContainer = document.getElementById('chatContainer');
@@ -30,69 +100,21 @@ const saveHistory = document.getElementById('saveHistory');
 /** 当前选择的图片 */
 let selectedImage = "";
 
-// WebSocket 事件处理
-ws.onopen = () => {
-    console.log('WebSocket 连接已建立');
-    appendSystemMessage('系统已连接，可以开始对话了。', 'system');
-};
-
-ws.onclose = () => {
-    console.log('WebSocket 连接已关闭');
-    appendSystemMessage('系统连接已断开，请刷新页面重试。', 'system');
-};
-
-ws.onerror = (error) => {
-    console.error('WebSocket 错误:', error);
-    appendSystemMessage('连接发生错误，请检查网络后重试。', 'system');
-};
-let all_message = "";
-ws.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-
-    switch (data.type) {
-        case 'response':
-            if (data.message === 'START_ANSWER') {
-                // 开始新的回复
-                startNewResponse();
-            } else if (data.message === 'END_ANSWER') {
-                // 结束当前回复
-                endResponse();
-                console.log(all_message);
-                all_message = "";
-            } else {
-                // 继续添加回复内容
-                if (isResponseInProgress) {
-                    appendSystemMessage(data.message);
-                    all_message += data.message;
-                }
-            }
-            break;
-        case 'reasoning':
-            if (data.message === 'START_REASONING') {
-                // 开始新的推理
-                startNewReasoning();
-            } else if (data.message === 'END_REASONING') {
-                // 结束当前推理
-                endReasoning();
-            } else {
-                // 继续添加推理内容
-                appendReasoningMessage(data.message);
-            }
-            break;
-        case 'history_loaded':
-            loadHistoryMessages(data.history);
-            break;
-        case 'history_saved':
-            appendSystemMessage('对话历史已保存。', 'start');
-            break;
-        case 'error':
-            appendSystemMessage('错误: ' + data.message, 'start');
-            break;
-    }
-};
-
 //发送消息
 function sendMessage() {
+    if (ws.readyState !== WebSocket.OPEN) {
+        appendSystemMessage('连接已断开，正在重连...', 'system');
+        connectWebSocket();
+        ws.onopen = () => {
+            appendSystemMessage('重连成功，正在发送消息...', 'system');
+            sendActualMessage();
+        };
+    } else {
+        sendActualMessage();
+    }
+}
+
+function sendActualMessage() {
     if (selectedImage) {
         sendImage(messageInput.value, selectedImage);
     } else {

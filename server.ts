@@ -1,8 +1,47 @@
 import { Application, Router } from "https://deno.land/x/oak@v12.6.1/mod.ts";
 import DialogueEngine from "./dialogue_engine.ts";
+import { existsSync } from "https://deno.land/std@0.224.0/fs/mod.ts";
+
 
 const app = new Application();
 const router = new Router();
+
+// 定义 JSON 内容
+const configContent = {
+    "host": "101.43.40.88",
+    "port": 3000,
+    "path": "/ws"
+};
+
+// 检查 public 文件夹中的 config.json 是否存在
+const filePath = "./public/config.json";
+
+// 检查文件是否存在
+try {
+    const fileExists = existsSync(filePath);
+
+    if (!fileExists) {
+        // 文件不存在，创建并写入内容
+        console.log("config.json 文件不存在，正在创建...");
+
+        // 将 JSON 对象转为字符串并写入文件
+        await Deno.writeTextFile(filePath, JSON.stringify(configContent, null, 2));
+
+        console.log("config.json 文件已创建并写入内容。");
+    } else {
+        console.log("config.json 文件已存在。");
+    }
+} catch (error) {
+    console.error("操作失败:", error);
+}
+
+let config_json = null;
+
+await Deno.readTextFile(filePath).then((data) => {
+    config_json = JSON.parse(data);
+}).catch((error) => {
+    console.error("读取文件失败:", error);
+});
 
 // 存储每个连接的上下文
 interface ClientContext {
@@ -73,7 +112,7 @@ router.get("/ws", async (ctx) => {
 
                 case "load_history":
                     console.log("加载历史记录", data.username);
-                    
+
                     await context.dialogueEngine.load_history(data.historyName);
                     socket.send(JSON.stringify({
                         type: "history_loaded",
@@ -90,7 +129,7 @@ router.get("/ws", async (ctx) => {
                     }));
                     break;
             }
-        // deno-lint-ignore no-explicit-any
+            // deno-lint-ignore no-explicit-any
         } catch (error: any) {
             console.error("Error processing message:", error);
             socket.send(JSON.stringify({
@@ -112,7 +151,7 @@ router.get("/ws", async (ctx) => {
 // 静态文件服务
 app.use(async (context, next) => {
     const path = context.request.url.pathname;
-    
+
     // 如果是根路径或index.html，检查是否需要重定向到登录页面
     if (path === '/' || path === '/index.html') {
         try {
@@ -140,7 +179,7 @@ app.use(router.allowedMethods());
 
 // 启动服务器
 const port = 3000;
-console.log(`HTTP server running on http://localhost:${port}`);
-console.log(`WebSocket endpoint available at ws://localhost:${port}/ws`);
+console.log(`HTTP server running on http://${config_json!.host}:${config_json!.port}`);
+console.log(`WebSocket endpoint available at ws://${config_json!.host}:${config_json!.port}/ws`);
 
 await app.listen({ port });
