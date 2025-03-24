@@ -104,29 +104,54 @@ router.get("/ws", async (ctx) => {
             // 处理不同类型的消息
             switch (data.type) {
                 case "img":
-                    await context.dialogueEngine.sendImgRequest(data.message, data.image);
+                    {
+                        await context.dialogueEngine.sendImgRequest(data.message, data.image);
+                    }
                     break;
                 case "chat":
-                    await context.dialogueEngine.sendRequest(data.message);
+                    {
+                        await context.dialogueEngine.sendRequest(data.message);
+                    }
                     break;
-
                 case "load_history":
-                    console.log("加载历史记录", data.username);
+                    {
+                        console.log("加载历史记录", data.username);
 
-                    await context.dialogueEngine.load_history(data.historyName);
-                    socket.send(JSON.stringify({
-                        type: "history_loaded",
-                        history: context.dialogueEngine.history,
-                        username: data.username,
-                    }));
+                        await context.dialogueEngine.load_history(data.historyName);
+                        socket.send(JSON.stringify({
+                            type: "history_loaded",
+                            history: context.dialogueEngine.history,
+                            username: data.username,
+                        }));
+                    }
                     break;
-
                 case "save_history":
-                    context.dialogueEngine.save_history(data.historyName);
-                    socket.send(JSON.stringify({
-                        type: "history_saved",
-                        success: true,
-                    }));
+                    {
+                        context.dialogueEngine.save_history(data.historyName);
+                        socket.send(JSON.stringify({
+                            type: "history_saved",
+                            success: true,
+                        }));
+                    }
+                    break;
+                case "history_list":
+                    {
+                        console.log("获取历史记录列表");
+                        //检查是否存在data.username的文件夹
+                        if (!existsSync(`./history/${data.username}`)) {
+                            Deno.mkdirSync(`./history/${data.username}`);
+                        }
+                        //获取history文件夹下所有的文件名称
+                        const historyList = Deno.readDirSync(`./history/${data.username}`);
+                        const historyNames: string[] = [];
+                        historyList.forEach((file) => {
+                            historyNames.push(file.name);
+                        });
+                        socket.send(JSON.stringify({
+                            type: "history_list",
+                            historyNames: historyNames,
+                        }));
+                    }
                     break;
             }
             // deno-lint-ignore no-explicit-any
