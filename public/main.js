@@ -83,7 +83,7 @@ function connectWebSocket() {
                 appendSystemMessage('对话历史已保存。', 'start');
                 break;
             case 'history_list':
-                console.log(data.historyNames);
+                renderHistoryList(data.historyNames);
                 break;
             case 'error':
                 appendSystemMessage('错误: ' + data.message, 'start');
@@ -100,9 +100,7 @@ const chatContainer = document.getElementById('chatContainer');
 const messageInput = document.getElementById('messageInput');
 const sendButton = document.getElementById('sendButton');
 const imageUpload = document.getElementById('imageUpload');
-const historyName = document.getElementById('historyName');
-const loadHistory = document.getElementById('loadHistory');
-const saveHistory = document.getElementById('saveHistory');
+const historyList = document.getElementById('historyList');
 
 /** 当前选择的图片 */
 let selectedImage = "";
@@ -408,27 +406,36 @@ messageInput.addEventListener('keypress', (e) => {
     }
 });
 
-loadHistory.addEventListener('click', () => {
-    const name = historyName.value.trim();
-    if (name) {
-        ws.send(JSON.stringify({
-            type: 'load_history',
-            historyName: name,
-            username: username
-        }));
+// 渲染历史记录列表
+function renderHistoryList(historyNames) {
+    // 保留标题元素
+    const titleElement = historyList.querySelector('.history-title');
+    historyList.innerHTML = '';
+    if (titleElement) {
+        historyList.appendChild(titleElement);
     }
-});
 
-saveHistory.addEventListener('click', () => {
-    const name = historyName.value.trim();
-    if (name) {
-        ws.send(JSON.stringify({
-            type: 'save_history',
-            historyName: name,
-            username: username
-        }));
-    }
-});
+    historyNames.forEach(name => {
+        const historyItem = document.createElement('div');
+        historyItem.className = 'history-item';
+        historyItem.textContent = name;
+        historyItem.addEventListener('click', () => {
+            // 移除其他项目的active类
+            document.querySelectorAll('.history-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            // 添加active类到当前项目
+            historyItem.classList.add('active');
+            // 加载对应的历史记录
+            ws.send(JSON.stringify({
+                type: 'load_history',
+                historyName: name,
+                username: username
+            }));
+        });
+        historyList.appendChild(historyItem);
+    });
+}
 
 // 初始化时自动滚动到底部
 scrollToBottom();
