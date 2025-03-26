@@ -260,7 +260,8 @@ export default class DialogueEngine {
             const historyJson = await Deno.readTextFile(this.get_history_path());
             this.history = JSON.parse(historyJson);
             this.round = this.history.length;
-            console.log("历史记录读取完成，当前轮次:", this.round);
+            //一问一答为1轮，如果只有一问或者一答则也算一轮
+            console.log("历史记录读取完成，当前轮次:", Math.floor(this.round / 2));
         } catch (error) {
             console.log("新建对话历史:", error);
         }

@@ -45,22 +45,19 @@ function connectWebSocket() {
 
     ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
-
+        
         switch (data.type) {
             case 'response':
                 if (data.message === 'START_ANSWER') {
                     // 开始新的回复
-                    startNewResponse();
+                    appendSystemMessage("", "chat");
                 } else if (data.message === 'END_ANSWER') {
                     // 结束当前回复
                     endResponse();
-                    console.log(all_message);
-                    all_message = "";
                 } else {
                     // 继续添加回复内容
                     if (isResponseInProgress) {
                         appendSystemMessage(data.message);
-                        all_message += data.message;
                     }
                 }
                 break;
@@ -80,13 +77,13 @@ function connectWebSocket() {
                 loadHistoryMessages(data.history);
                 break;
             case 'history_saved':
-                appendSystemMessage('对话历史已保存。', 'start');
+                appendSystemMessage('对话历史已保存。', 'system');
                 break;
             case 'history_list':
                 renderHistoryList(data.historyNames);
                 break;
             case 'error':
-                appendSystemMessage('错误: ' + data.message, 'start');
+                appendSystemMessage('错误: ' + data.message, 'system');
                 break;
         }
     };
@@ -153,9 +150,9 @@ function sendTextMessage(input) {
     messageInput.value = '';
 }
 
-function getHistoryList(){
+function getHistoryList() {
     console.log("请求历史记录");
-    
+
     ws.send(JSON.stringify({
         type: 'history_list',
         username: username
@@ -194,7 +191,7 @@ let isResponseInProgress = false;
 // 添加或更新系统消息
 function appendSystemMessage(message, status) {
     // 如果是开始新的回复
-    if (status === 'start' || status === 'system' || status === 'error') {
+    if (status === 'chat' || status === 'system' || status === 'error') {
         // 创建新的系统消息容器
         currentResponseMessage = document.createElement('div');
         currentResponseMessage.className = 'message system-message';
@@ -208,7 +205,7 @@ function appendSystemMessage(message, status) {
         iconSpan.className = 'ai-icon';
         if (status === 'system') {
             iconSpan.textContent = '💡';
-        } else if (status === 'start') {
+        } else if (status === 'chat') {
             iconSpan.textContent = '🐰';
         } else if (status === 'error') {
             iconSpan.textContent = '❌';
@@ -334,16 +331,19 @@ function appendUserMessage(message, image = null) {
 
 // 加载历史消息
 function loadHistoryMessages(history) {
+    console.log("加载历史消息", history);
+
     chatContainer.innerHTML = '';
     history.forEach(entry => {
-        const parts = entry.split('\n');
-        parts.forEach(part => {
-            if (part.startsWith('user:')) {
-                appendUserMessage(part.substring(5).trim());
-            } else if (part.startsWith('system:')) {
-                appendSystemMessage(part.substring(7).trim());
-            }
-        });
+        const role = entry.role;
+        const content = entry.content;
+        if (role == "user") {
+            console.log("还原用户消息");
+            appendUserMessage(content);
+        } else if (role == "system") {
+            console.log("还原系统消息");
+            appendSystemMessage(content, "chat");
+        }
     });
 }
 
