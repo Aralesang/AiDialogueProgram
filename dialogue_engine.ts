@@ -23,9 +23,11 @@ export default class DialogueEngine {
     public isReasoningMode = false;
     constructor(
         reasoningCallback: (content: string) => void,
-        answerCallback: (content: string) => void) {
+        answerCallback: (content: string) => void,
+        ondialogueComplete: () => void) {
         this.reasoningCallback = reasoningCallback || null;
         this.answerCallback = answerCallback || null;
+        this.onDialogueComplete = ondialogueComplete || null;
     }
 
     // 使用 Deno 的标准输出 API
@@ -125,6 +127,7 @@ export default class DialogueEngine {
     private async handleOpenAIRequest(message: string) {
         openai.apiKey = API_CONFIG.openai.apiKey;
         openai.baseURL = API_CONFIG.openai.baseURL;
+        //向API请求
         const completion = await openai.chat.completions.create({
             model: API_CONFIG.openai.model,
             messages: [
@@ -132,104 +135,44 @@ export default class DialogueEngine {
             ],
             stream: true,
         });
-
+        //处理流式结果
         for await (const chunk of completion) {
+            console.log(chunk);
             this.processOpenAIChunk(chunk);
+        }
+        //流式传输处理完成
+        if (this.onDialogueComplete) {
+            this.onDialogueComplete();
         }
     }
     /** 处理OpenAI数据块 */
     private processOpenAIChunk(chunk: OpenAI.ChatCompletionChunk) {
         const delta = chunk.choices[0].delta as CustomDelta;
-        this.processDeltaContent(delta);
+        if (delta.reasoning_content) {
+            this.handleReasoningContent(delta.reasoning_content);
+        } else if (delta.content) {
+            if (this.isReasoningMode) {
+                this.isReasoningMode = false;
+            }
+            // 如果是第一次收到内容，发送开始标记
+            if (this.isFirstContent) {
+                this.isFirstContent = false;
+            }
+            this.system_message += delta.content;
+            // 把回复发给前端
+            if (this.answerCallback) {
+                this.answerCallback(delta.content);
+            }
+        }
     }
 
     private isFirstContent = true;
 
-    /** 处理内容片段 */
-    private processDeltaContent(delta: CustomDelta) {
-        if (delta.reasoning_content) {
-            if (!this.isReasoningMode) {
-                this.startReasoning();
-                this.isReasoningMode = true;
-            }
-            this.handleReasoningContent(delta.reasoning_content);
-        } else if (delta.content) {
-            if (this.isReasoningMode) {
-                this.endReasoning();
-                this.isReasoningMode = false;
-            }
-
-            // 如果是第一次收到内容，发送开始标记
-            if (this.isFirstContent) {
-                this.startAnswer();
-                this.isFirstContent = false;
-            }
-
-            this.handleAnswerContent(delta.content);
-        }
-    }
-
-    /** 开始推理过程 */
-    private startReasoning() {
-        if (API_CONFIG.show_reasoning_content && this.reasoningCallback) {
-            this.reasoningCallback('START_REASONING');
-        }
-    }
-
-    /** 结束推理过程 */
-    private endReasoning() {
-        if (API_CONFIG.show_reasoning_content && this.reasoningCallback) {
-            this.reasoningCallback('END_REASONING');
-            this.reasoning_message = ""; // 清空推理内容缓存
-        }
-    }
-
-    /** 开始正文回复 */
-    private startAnswer() {
-        if (this.answerCallback) {
-            this.answerCallback('START_ANSWER');
-        }
-    }
-
-    /** 结束正文回复 */
-    private endAnswer() {
-        if (this.answerCallback) {
-            this.answerCallback('END_ANSWER');
-        }
-    }
-
     /** 处理推理内容 */
     private handleReasoningContent(content: string) {
-        if (API_CONFIG.show_reasoning_content) {
-            this.sendReasoningContent(content);
-        }
-    }
-
-    /** 处理正文内容 */
-    private handleAnswerContent(content: string) {
-        //this.system_message += content;
-        this.system_message += content;
-        this.sendAnswerContent(content);
-    }
-
-    /** 把推理内容发送给web前端 */
-    public sendReasoningContent(content: string) {
-        // 如果启用了推理内容显示，将推理内容发送给前端
-        if (API_CONFIG.show_reasoning_content) {
-            //this.reasoning_message += content;
-            // 如果有回调函数，调用它发送内容
-            if (this.reasoningCallback) {
-                this.reasoningCallback(content);
-            }
-        }
-    }
-
-    /** 把正文内容发送给web前端 */
-    public sendAnswerContent(content: string) {
-        this.system_message += content;
-        // 如果有回调函数，调用它发送内容
-        if (this.answerCallback) {
-            this.answerCallback(content);
+        //推理内容发送给前端
+        if (this.reasoningCallback) {
+            this.reasoningCallback(content);
         }
     }
 
@@ -287,13 +230,11 @@ export default class DialogueEngine {
         await this.handleImageRequest(message, url);
         // 确保推理模式已结束
         if (this.isReasoningMode) {
-            this.endReasoning();
             this.isReasoningMode = false;
         }
 
         // 结束回复
         if (!this.isFirstContent) {
-            this.endAnswer();
             // 等待一小段时间确保消息被发送
             await new Promise(resolve => setTimeout(resolve, 100));
         }
@@ -315,23 +256,10 @@ export default class DialogueEngine {
         await this.handleOpenAIRequest(message);
         // 确保推理模式已结束
         if (this.isReasoningMode) {
-            this.endReasoning();
             this.isReasoningMode = false;
-        }
-
-        // 结束回复
-        if (!this.isFirstContent) {
-            this.endAnswer();
-            // 等待一小段时间确保消息被发送
-            await new Promise(resolve => setTimeout(resolve, 100));
         }
 
         this.round++;
         this.update_history(input, this.system_message);
-
-        // 通知对话完成
-        if (this.onDialogueComplete) {
-            this.onDialogueComplete();
-        }
     }
 }

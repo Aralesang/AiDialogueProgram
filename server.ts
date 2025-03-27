@@ -81,6 +81,17 @@ router.get("/ws", async (ctx) => {
                 console.error('发送回复消息失败:', error);
                 clients.delete(socket);
             }
+        },
+        // 对话完成
+        () => {
+            try {
+                socket.send(JSON.stringify({
+                    type: 'chat_end'
+                }));
+            } catch (error) {
+                console.error('发送回复消息失败:', error);
+                clients.delete(socket);
+            }
         }
     );
 
@@ -100,9 +111,9 @@ router.get("/ws", async (ctx) => {
 
         try {
             const data = JSON.parse(event.data);
-
+            console.log(data);
             // 处理不同类型的消息
-            switch (data.type) {
+            switch (data.type) {                
                 case "img":
                     {
                         await context.dialogueEngine.sendImgRequest(data.message, data.image);
