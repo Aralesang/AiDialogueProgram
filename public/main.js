@@ -18,6 +18,8 @@ document.getElementById('logoutButton').addEventListener('click', () => {
 //获取目录下的json配置文件
 const config_res = await fetch('./config.json');
 const config = await config_res.json();
+//当前对话状态
+let current_status = "";
 // WebSocket 连接
 let ws = new WebSocket(`ws://${config.host}:${config.port}/ws`);
 
@@ -45,15 +47,27 @@ function connectWebSocket() {
 
     ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        
+
         switch (data.type) {
+            case 'reasoning':
+                if (current_status != "推理中") {
+                    // 开始新的推理
+                    startNewReasoning();
+                    current_status = "推理中";
+                } else {
+                    // 继续添加推理内容
+                    appendReasoningMessage(data.message);
+                }
+                break;
             case 'response':
-                if (data.message === 'START_ANSWER') {
+                if (current_status == "推理中") { //如果处于推理中，则先结束推理
+                    // 结束当前推理
+                    endReasoning();
+                }
+                if (current_status != "回复中") {
                     // 开始新的回复
                     appendSystemMessage("", "chat");
-                } else if (data.message === 'END_ANSWER') {
-                    // 结束当前回复
-                    endResponse();
+                    current_status = "回复中";
                 } else {
                     // 继续添加回复内容
                     if (isResponseInProgress) {
@@ -61,16 +75,9 @@ function connectWebSocket() {
                     }
                 }
                 break;
-            case 'reasoning':
-                if (data.message === 'START_REASONING') {
-                    // 开始新的推理
-                    startNewReasoning();
-                } else if (data.message === 'END_REASONING') {
-                    // 结束当前推理
-                    endReasoning();
-                } else {
-                    // 继续添加推理内容
-                    appendReasoningMessage(data.message);
+            case 'chat_end':// 对话完成
+                if (current_status == "回复中") {
+                    endResponse();
                 }
                 break;
             case 'history_loaded':
