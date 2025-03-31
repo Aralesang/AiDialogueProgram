@@ -17,6 +17,12 @@ type ChatCompletionChunk = {
     }>;
 };
 
+type History = {
+    role: string,
+    content: string,
+    reasoning_content?: string
+}
+
 export default class DialogueEngine {
     // 推理内容发送回调
     private reasoningCallback: ((content: string) => void) | null = null;
@@ -39,7 +45,7 @@ export default class DialogueEngine {
     /** 记忆 */
     memory = "";
     /** 历史记录 */
-    history: string[] = [];
+    history: History[] = [];
     /** 当前对话轮次 */
     round = 0;
     /** 当前历史记录文件名 */
@@ -69,10 +75,13 @@ export default class DialogueEngine {
     }
 
     /** 构建消息体 */
-    private buildMessage(input: string): string {
+    public buildMessage(input: string): string {
         let message = this.memory;
         if (API_CONFIG.enable_multi_turn && this.history.length > 0) {
-            message += this.history.join("\n");
+            //追加历史记录，但忽略推理内容
+            for(const history of this.history){
+                message += history.role + ":" + history.content;
+            }
         }
         return message + " user:" + input;
     }
@@ -197,9 +206,20 @@ export default class DialogueEngine {
     }
 
     /** 更新历史记录 */
-    public update_history(user_message: string, system_message: string) {
-        const message = "\n user:" + user_message + "\n system:" + system_message;
-        this.history.push(message);
+    public update_history(user_message: string, system_message: string, reasoning: string = "") {
+        //构建对象格式
+        const user: History = {
+            role: "user",
+            content: user_message
+        }
+        const system: History = {
+            role: "system",
+            content: system_message,
+            reasoning_content: reasoning
+        }
+        //const message = "\n user:" + user_message + "\n system:" + system_message;
+        this.history.push(user);
+        this.history.push(system);
         if (this.historyFileName) {
             Deno.writeTextFileSync(this.get_history_path(), JSON.stringify(this.history));
         }
@@ -269,12 +289,14 @@ export default class DialogueEngine {
     }
     public sendRequest(input: string) {
         this.system_message = "";  // 重置系统消息
+        let reasoning_content_history = ""; //推理内容
         const message = this.buildMessage(input);
         //await this.handleOpenAIRequest(message);
         AiApiRequestManager.openAIRequest(message,
             (reasoning_content: string, content: string, end: boolean) => {
                 if (reasoning_content) {
                     this.handleReasoningContent(reasoning_content);
+                    reasoning_content_history += reasoning_content;
                 }
                 if (content) {
                     this.system_message += content;
@@ -286,11 +308,12 @@ export default class DialogueEngine {
                 }
                 if (end) {
                     this.round++;
-                    this.update_history(input, this.system_message);
+                    this.update_history(input, this.system_message, reasoning_content_history);
                     // 发送对话完成
                     if (this.onDialogueComplete) {
                         this.onDialogueComplete();
                     }
+
                 }
             });
 

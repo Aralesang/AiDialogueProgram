@@ -1,6 +1,8 @@
 import { Application, Router } from "https://deno.land/x/oak@v12.6.1/mod.ts";
 import DialogueEngine from "./dialogue_engine.ts";
 import { existsSync } from "https://deno.land/std@0.224.0/fs/mod.ts";
+import { API_CONFIG } from "./config.ts";
+import { AiApiRequestManager } from "./AIApiRequestManager.ts";
 
 
 const app = new Application();
@@ -88,6 +90,29 @@ router.get("/ws", async (ctx) => {
                 socket.send(JSON.stringify({
                     type: 'chat_end'
                 }));
+                if (dialogueEngine.round == 1) {
+                    console.log("第一轮对话结束,记录对话历史");
+                    //这段请求使用v3模型
+                    API_CONFIG.openai.model = "deepseek-v3";
+                    let res_all = "";
+                    //提示词
+                    const prompt = "请把之前的对话总结为一个简短的词语或者一个句子，不要包含任何特殊符号，十个字以内";
+                    AiApiRequestManager.openAIRequest(dialogueEngine.buildMessage(prompt),
+                        (_reasoning_content: string, content: string, end: boolean) => {
+                            if (content) {
+                                console.log(content);
+                                res_all += content;
+                            }
+                            if (end) {
+                                console.log("对话总结结束");
+                                dialogueEngine.save_history(res_all);
+                                //通知客户端刷新历史记录
+                                send_history_list(socket, dialogueEngine.username);
+                            }
+                        });
+                    //模型还原
+                    API_CONFIG.openai.model = "deepseek-r1";
+                }
             } catch (error) {
                 console.error('发送回复消息失败:', error);
                 clients.delete(socket);
@@ -112,8 +137,9 @@ router.get("/ws", async (ctx) => {
         try {
             const data = JSON.parse(event.data);
             console.log(data);
+           
             // 处理不同类型的消息
-            switch (data.type) {                
+            switch (data.type) {
                 case "img":
                     {
                         await context.dialogueEngine.sendImgRequest(data.message, data.image);
@@ -147,26 +173,8 @@ router.get("/ws", async (ctx) => {
                     break;
                 case "history_list":
                     {
-                        console.log("获取历史记录列表");
-                        //检查是否存在data.username的文件夹
-                        if (!existsSync(`./history/${data.username}`)) {
-                            Deno.mkdirSync(`./history/${data.username}`);
-                        }
-                        //获取history文件夹下所有的文件名称
-                        const historyList = Deno.readDirSync(`./history/${data.username}`);
-                        const historyNames: string[] = [];
-                        historyList.forEach((file) => {
-                            //去掉.json
-                            let name = file.name;
-                            if (name.endsWith(".json")) {
-                                name = name.substring(0, name.length - 5);
-                            }
-                            historyNames.push(name);
-                        });
-                        socket.send(JSON.stringify({
-                            type: "history_list",
-                            historyNames: historyNames,
-                        }));
+                        context.dialogueEngine.username = data.username;
+                        send_history_list(socket, data.username);
                     }
                     break;
             }
@@ -185,9 +193,31 @@ router.get("/ws", async (ctx) => {
         clients.delete(socket);
         console.log("WebSocket connection closed");
     };
-
     return ctx.response;
 });
+
+function send_history_list(socket: WebSocket, username: string) {
+    console.log("获取历史记录列表");
+    //检查是否存在data.username的文件夹
+    if (!existsSync(`./history/${username}`)) {
+        Deno.mkdirSync(`./history/${username}`);
+    }
+    //获取history文件夹下所有的文件名称
+    const historyList = Deno.readDirSync(`./history/${username}`);
+    const historyNames: string[] = [];
+    historyList.forEach((file) => {
+        //去掉.json
+        let name = file.name;
+        if (name.endsWith(".json")) {
+            name = name.substring(0, name.length - 5);
+        }
+        historyNames.push(name);
+    });
+    socket.send(JSON.stringify({
+        type: "history_list",
+        historyNames: historyNames,
+    }));
+}
 
 // 静态文件服务
 app.use(async (context, next) => {
