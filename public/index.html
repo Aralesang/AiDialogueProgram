@@ -35,16 +35,19 @@
                         <option value="deepseek-v3">DeepSeek-V3</option>
                     </select>
                     <div class="file-upload">
-                    <label for="imageUpload" class="upload-label">
-                        <span>🖼️ 上传图片</span>
-                    </label>
-                    <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+                        <label for="imageUpload" class="upload-label">
+                            <span>🖼️ 上传图片</span>
+                        </label>
+                        <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+                    </div>
                 </div>
-                <textarea id="messageInput" placeholder="输入你的问题..."></textarea>
-                <button id="sendButton">
-                    <span>发送</span>
-                    <span>🚀</span>
-                </button>
+                <div class="input-controls">
+                    <textarea id="messageInput" placeholder="输入你的问题..."></textarea>
+                    <button id="sendButton">
+                        <span>发送</span>
+                        <span>🚀</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>

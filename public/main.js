@@ -383,7 +383,7 @@ imageUpload.addEventListener('change', async (e) => {
 function updateImagePreview() {
     const label = document.querySelector('.upload-label');
     if (selectedImage) {
-        label.innerHTML = '<span>� 已选择图片</span>';
+        label.innerHTML = '<span>📎 已选择图片</span>';
     } else {
         label.innerHTML = '<span>🖼️ 上传图片</span>';
     }
