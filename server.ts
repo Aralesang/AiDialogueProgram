@@ -1,7 +1,6 @@
 import { Application, Router } from "https://deno.land/x/oak@v12.6.1/mod.ts";
 import DialogueEngine from "./dialogue_engine.ts";
 import { existsSync } from "https://deno.land/std@0.224.0/fs/mod.ts";
-import { API_CONFIG } from "./config.ts";
 import { AiApiRequestManager } from "./AIApiRequestManager.ts";
 
 
@@ -92,13 +91,12 @@ router.get("/ws", async (ctx) => {
                 }));
                 if (dialogueEngine.round == 1) {
                     console.log("第一轮对话结束,记录对话历史");
-                    //这段请求使用v3模型
-                    API_CONFIG.openai.model = "deepseek-v3";
                     let res_all = "";
                     //提示词
                     const prompt = "请把之前的对话总结为一个简短的词语或者一个句子，不要包含任何特殊符号，十个字以内";
                     AiApiRequestManager.openAIRequest(dialogueEngine.buildMessage(prompt),
-                        (_reasoning_content: string, content: string, end: boolean) => {
+                    "deepseek-v3",    
+                    (_reasoning_content: string, content: string, end: boolean) => {
                             if (content) {
                                 console.log(content);
                                 res_all += content;
@@ -110,8 +108,6 @@ router.get("/ws", async (ctx) => {
                                 send_history_list(socket, dialogueEngine.username);
                             }
                         });
-                    //模型还原
-                    API_CONFIG.openai.model = "deepseek-r1";
                 }
             } catch (error) {
                 console.error('发送回复消息失败:', error);
@@ -147,7 +143,7 @@ router.get("/ws", async (ctx) => {
                     break;
                 case "chat":
                     {
-                        await context.dialogueEngine.sendRequest(data.message);
+                        await context.dialogueEngine.sendRequest(data.message, data.model);
                     }
                     break;
                 case "load_history":

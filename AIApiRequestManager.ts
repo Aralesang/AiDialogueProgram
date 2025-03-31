@@ -2,7 +2,7 @@ import { API_CONFIG } from "./config.ts";
 
 const AiApiRequestManager = {
     /** 处理OpenAI请求 */
-    async openAIRequest(message: string, call_back: (reasoning_content: string, content: string, end: boolean) => void) {
+    async openAIRequest(message: string,model: string, call_back: (reasoning_content: string, content: string, end: boolean) => void) {
         //向远程api发出请求
         const response = await fetch(`${API_CONFIG.openai.baseURL}/v1/chat/completions`, {
             method: 'POST',
@@ -11,7 +11,7 @@ const AiApiRequestManager = {
                 'Authorization': `Bearer ${API_CONFIG.openai.apiKey}`,
             },
             body: JSON.stringify({
-                model: API_CONFIG.openai.model,
+                model: model,
                 messages: [
                     { role: 'user', content: message }
                 ],

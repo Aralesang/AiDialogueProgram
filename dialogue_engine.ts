@@ -287,12 +287,12 @@ export default class DialogueEngine {
             this.onDialogueComplete();
         }
     }
-    public sendRequest(input: string) {
+    public sendRequest(input: string, model: string) {
         this.system_message = "";  // 重置系统消息
         let reasoning_content_history = ""; //推理内容
         const message = this.buildMessage(input);
         //await this.handleOpenAIRequest(message);
-        AiApiRequestManager.openAIRequest(message,
+        AiApiRequestManager.openAIRequest(message,model,
             (reasoning_content: string, content: string, end: boolean) => {
                 if (reasoning_content) {
                     this.handleReasoningContent(reasoning_content);
