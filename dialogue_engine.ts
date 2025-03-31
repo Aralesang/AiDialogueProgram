@@ -89,12 +89,11 @@ export default class DialogueEngine {
     /** 处理图像请求 */
     public async handleImageRequest(input_message: string, url: string) {
         console.log("获取到外链:", url);
-
         let attempts = 0;
         while (attempts < 10) {
             attempts++;
             try {
-                const response = await fetch(`${API_CONFIG.img_model.baseURL}/v1/chat/completions`, {
+                const response = await fetch(`${API_CONFIG.img_model.baseURL}/chat/completions`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -122,7 +121,6 @@ export default class DialogueEngine {
                         stream: true,
                     }),
                 });
-
                 if (!response.ok) {
                     const error = await response.json();
                     throw new Error(`OpenAI API error: ${error.error?.message || 'Unknown error'}`);
