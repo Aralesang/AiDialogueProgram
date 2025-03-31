@@ -1,16 +1,20 @@
-import { OpenAI } from "https://deno.land/x/openai@v4.69.0/mod.ts";
 import { API_CONFIG } from "./config.ts";
+import { AiApiRequestManager } from './AIApiRequestManager.ts'
 
-// 初始化OpenAI客户端（仅用于OpenAI模式）
-const openai = new OpenAI({
-    apiKey: API_CONFIG.openai.apiKey,
-    baseURL: API_CONFIG.openai.baseURL
-});
-
-type CustomDelta = {
-    content?: string;
-    reasoning_content?: string;
-    role?: string;
+type ChatCompletionChunk = {
+    id: string;
+    object: string;
+    created: number;
+    model: string;
+    choices: Array<{
+        index: number;
+        delta: {
+            content?: string;
+            reasoning_content?: string;
+            role?: string;
+        };
+        finish_reason: string | null;
+    }>;
 };
 
 export default class DialogueEngine {
@@ -75,79 +79,95 @@ export default class DialogueEngine {
 
     /** 处理图像请求 */
     public async handleImageRequest(input_message: string, url: string) {
-        openai.apiKey = API_CONFIG.img_model.apiKey;
-        openai.baseURL = API_CONFIG.img_model.baseURL;
         console.log("获取到外链:", url);
 
         let attempts = 0;
-        let completion = null;
         while (attempts < 10) {
             attempts++;
             try {
-                completion = await openai.chat.completions.create({
-                    model: API_CONFIG.img_model.model,
-                    messages: [
-                        {
-                            "role": "user",
-                            "content": [
-                                {
-                                    "type": "text",
-                                    "text": input_message
-                                },
-                                {
-                                    "type": "image_url",
-                                    "image_url": {
-                                        "url": url
+                const response = await fetch(`${API_CONFIG.img_model.baseURL}/v1/chat/completions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_CONFIG.img_model.apiKey}`,
+                    },
+                    body: JSON.stringify({
+                        model: API_CONFIG.img_model.model,
+                        messages: [
+                            {
+                                "role": "user",
+                                "content": [
+                                    {
+                                        "type": "text",
+                                        "text": input_message
+                                    },
+                                    {
+                                        "type": "image_url",
+                                        "image_url": {
+                                            "url": url
+                                        }
                                     }
-                                }
-                            ]
-                        }
-                    ],
-                    stream: true,
+                                ]
+                            }
+                        ],
+                        stream: true,
+                    }),
                 });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(`OpenAI API error: ${error.error?.message || 'Unknown error'}`);
+                }
+
+                if (!response.body) {
+                    throw new Error('Response body is null');
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                try {
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+
+                        buffer += decoder.decode(value, { stream: true });
+                        const lines = buffer.split('\n');
+                        buffer = lines.pop() || '';
+
+                        for (const line of lines) {
+                            if (line.trim() === '') continue;
+                            if (line.trim() === 'data: [DONE]') continue;
+
+                            try {
+                                const data = JSON.parse(line.replace(/^data: /, ''));
+                                this.processOpenAIChunk(data);
+                            } catch (e) {
+                                console.error('Error parsing chunk:', e);
+                            }
+                        }
+                    }
+                } finally {
+                    reader.releaseLock();
+                }
+
+                console.log("请求成功");
+                break;
             } catch (error) {
                 console.error("请求失败，第" + attempts + "次重试", error);
+                if (attempts === 10) {
+                    throw new Error("请求失败，已达到最大重试次数");
+                }
                 continue;
             }
-            console.log("请求成功");
-            break;
-        }
-
-        if (attempts === 50) {
-            throw new Error("请求失败，已达到最大重试次数");
-        }
-
-        // deno-lint-ignore no-explicit-any
-        for await (const chunk of completion as any) {
-            this.processOpenAIChunk(chunk);
         }
     }
 
-    /** 处理OpenAI请求 */
-    private async handleOpenAIRequest(message: string) {
-        openai.apiKey = API_CONFIG.openai.apiKey;
-        openai.baseURL = API_CONFIG.openai.baseURL;
-        //向API请求
-        const completion = await openai.chat.completions.create({
-            model: API_CONFIG.openai.model,
-            messages: [
-                { role: 'user', content: message }
-            ],
-            stream: true,
-        });
-        //处理流式结果
-        for await (const chunk of completion) {
-            console.log(chunk);
-            this.processOpenAIChunk(chunk);
-        }
-        //流式传输处理完成
-        if (this.onDialogueComplete) {
-            this.onDialogueComplete();
-        }
-    }
+
     /** 处理OpenAI数据块 */
-    private processOpenAIChunk(chunk: OpenAI.ChatCompletionChunk) {
-        const delta = chunk.choices[0].delta as CustomDelta;
+    private processOpenAIChunk(chunk: ChatCompletionChunk) {
+        const delta = chunk.choices[0].delta;
         if (delta.reasoning_content) {
             this.handleReasoningContent(delta.reasoning_content);
         } else if (delta.content) {
@@ -247,19 +267,34 @@ export default class DialogueEngine {
             this.onDialogueComplete();
         }
     }
-    public async sendRequest(input: string) {
-        // 重置状态
-        this.isReasoningMode = false;
-        this.isFirstContent = true;
+    public sendRequest(input: string) {
         this.system_message = "";  // 重置系统消息
         const message = this.buildMessage(input);
-        await this.handleOpenAIRequest(message);
-        // 确保推理模式已结束
-        if (this.isReasoningMode) {
-            this.isReasoningMode = false;
-        }
+        //await this.handleOpenAIRequest(message);
+        AiApiRequestManager.openAIRequest(message,
+            (reasoning_content: string, content: string, end: boolean) => {
+                if (reasoning_content) {
+                    this.handleReasoningContent(reasoning_content);
+                }
+                if (content) {
+                    this.system_message += content;
+                    // 把回复发给前端
+                    if (this.answerCallback) {
+                        console.log(content);
+                        this.answerCallback(content);
+                    }
+                }
+                if (end) {
+                    this.round++;
+                    this.update_history(input, this.system_message);
+                    // 发送对话完成
+                    if (this.onDialogueComplete) {
+                        this.onDialogueComplete();
+                    }
+                }
+            });
 
-        this.round++;
-        this.update_history(input, this.system_message);
+
+
     }
 }

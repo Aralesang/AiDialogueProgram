@@ -52,7 +52,6 @@ function connectWebSocket() {
             case 'reasoning':
                 if (current_status != "推理中") {
                     // 开始新的推理
-                    startNewReasoning();
                     current_status = "推理中";
                 } else {
                     // 继续添加推理内容
@@ -66,7 +65,7 @@ function connectWebSocket() {
                 }
                 if (current_status != "回复中") {
                     // 开始新的回复
-                    appendSystemMessage("", "chat");
+                    appendSystemMessage(data.message, "chat");
                     current_status = "回复中";
                 } else {
                     // 继续添加回复内容
@@ -262,12 +261,6 @@ let isReasoningInProgress = false;
 
 // 添加推理消息
 function appendReasoningMessage(message) {
-    // 检查是否是结束标记
-    if (message === 'END_REASONING') {
-        endReasoning();
-        return;
-    }
-
     // 如果是新的推理过程开始
     if (!isReasoningInProgress) {
         // 创建新的推理消息容器
@@ -309,11 +302,6 @@ function endReasoning() {
         currentReasoningMessage = null;
         scrollToBottom();
     }
-}
-
-//开始推理过程
-function startNewReasoning() {
-
 }
 
 // 添加用户消息
