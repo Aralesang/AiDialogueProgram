@@ -337,8 +337,9 @@ function loadHistoryMessages(history) {
         const role = entry.role;
         const content = entry.content;
         if (role == "user") {
-            console.log("还原用户消息");
-            appendUserMessage(content);
+            console.log("还原用户消息", content);
+            //如果有图片
+            appendUserMessage(content, entry.img_url);
         } else if (role == "system") {
             console.log("还原系统消息");
             appendSystemMessage(content, "chat");

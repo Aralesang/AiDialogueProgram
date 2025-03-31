@@ -20,7 +20,8 @@ type ChatCompletionChunk = {
 type History = {
     role: string,
     content: string,
-    reasoning_content?: string
+    reasoning_content?: string,
+    img_url?: string
 }
 
 export default class DialogueEngine {
@@ -204,11 +205,12 @@ export default class DialogueEngine {
     }
 
     /** 更新历史记录 */
-    public update_history(user_message: string, system_message: string, reasoning: string = "") {
+    public update_history(user_message: string, system_message: string, reasoning: string = "", img_url: string = "") {
         //构建对象格式
         const user: History = {
             role: "user",
-            content: user_message
+            content: user_message,
+            img_url: img_url
         }
         const system: History = {
             role: "system",
@@ -278,7 +280,7 @@ export default class DialogueEngine {
         }
 
         this.round++;
-        this.update_history(input, this.system_message);
+        this.update_history(input, this.system_message, "", url);
 
         // 通知对话完成
         if (this.onDialogueComplete) {
