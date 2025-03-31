@@ -203,6 +203,34 @@ body {
     align-items: end;
 }
 
+.model-file-container {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.model-select {
+    padding: 0.8rem 1.2rem;
+    background-color: var(--bg-color);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    font-size: 1rem;
+    font-family: inherit;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.model-select:hover {
+    border-color: var(--primary-color);
+}
+
+.model-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--shadow-color);
+}
+
 .file-upload {
     position: relative;
 }

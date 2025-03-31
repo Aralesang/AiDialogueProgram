@@ -142,12 +142,13 @@ function sendTextMessage(input) {
     messageInput.placeholder = '等待回复...';
 
     // 发送消息到服务器
+    const selectedModel = document.getElementById('modelSelect').value;
     ws.send(JSON.stringify({
         type: 'chat',
         message: message,
         image: "",
         username: username,
-        model: "deepseek-r1"
+        model: selectedModel
     }));
 
     // 显示用户消息
@@ -176,11 +177,13 @@ function sendImage(input, image) {
         input = "首先请告诉我你看到了什么,然后详细描述图片上的内容，如果图片的内容关联到了某些影视,文学,电子游戏等其他可能的内容,也请告知";
     }
     // 发送消息到服务器
+    const selectedModel = document.getElementById('modelSelect').value;
     ws.send(JSON.stringify({
         type: 'img',
         message: input,
         image: image,
-        username: username
+        username: username,
+        model: selectedModel
     }));
 
     // 显示用户消息
@@ -380,7 +383,7 @@ imageUpload.addEventListener('change', async (e) => {
 function updateImagePreview() {
     const label = document.querySelector('.upload-label');
     if (selectedImage) {
-        label.innerHTML = '<span>📎 已选择图片</span>';
+        label.innerHTML = '<span>� 已选择图片</span>';
     } else {
         label.innerHTML = '<span>🖼️ 上传图片</span>';
     }
