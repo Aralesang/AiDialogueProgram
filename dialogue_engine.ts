@@ -1,5 +1,6 @@
 import { API_CONFIG } from "./config.ts";
-import { AiApiRequestManager } from './AIApiRequestManager.ts'
+import { AiApiRequestManager } from './AIApiRequestManager.ts';
+import { existsSync } from "https://deno.land/std@0.224.0/fs/mod.ts";
 
 type ChatCompletionChunk = {
     id: string;
@@ -67,8 +68,8 @@ export default class DialogueEngine {
     }
 
     /** 获取历史记录文件路径 */
-    public get_history_path() {
-        return this.exe_path + "/history/" + this.username + "/" + this.historyFileName + ".json";
+    public get_history_path(file_name: string) {
+        return this.exe_path + "/history/" + this.username + "/" + file_name + ".json";
     }
 
     public get_api_config() {
@@ -80,7 +81,7 @@ export default class DialogueEngine {
         let message = this.memory;
         if (API_CONFIG.enable_multi_turn && this.history.length > 0) {
             //追加历史记录，但忽略推理内容
-            for(const history of this.history){
+            for (const history of this.history) {
                 message += history.role + ":" + history.content;
             }
         }
@@ -221,7 +222,7 @@ export default class DialogueEngine {
         this.history.push(user);
         this.history.push(system);
         if (this.historyFileName) {
-            Deno.writeTextFileSync(this.get_history_path(), JSON.stringify(this.history));
+            Deno.writeTextFileSync(this.get_history_path(this.historyFileName), JSON.stringify(this.history));
         }
     }
 
@@ -240,7 +241,7 @@ export default class DialogueEngine {
         console.log("正在读取历史记录...");
         try {
             this.historyFileName = history_name;
-            const historyJson = await Deno.readTextFile(this.get_history_path());
+            const historyJson = await Deno.readTextFile(this.get_history_path(this.historyFileName));
             this.history = JSON.parse(historyJson);
             this.round = this.history.length;
             //一问一答为1轮，如果只有一问或者一答则也算一轮
@@ -249,12 +250,31 @@ export default class DialogueEngine {
             console.log("新建对话历史:", error);
         }
     }
-
+    async fileExists(filePath: string): Promise<boolean> {
+        try {
+            await Deno.stat(filePath);
+            return true;
+        } catch (error) {
+            if (error instanceof Deno.errors.NotFound) {
+                return false;
+            }
+            throw error; // 重新抛出其他错误
+        }
+    }
     public save_history(history_name: string) {
         console.log("正在保存历史记录...");
         try {
+            //检查是否存在这个文件
+            const fileExists = existsSync(this.get_history_path(history_name));
+            console.log(this.get_history_path(history_name), fileExists);
+            if (fileExists) {
+                //如果存在,检查是否有后缀
+                history_name = history_name + "_" + Date.now();
+            }
+            console.log("构建历史记录名称:", history_name);
+
             this.historyFileName = history_name;
-            Deno.writeTextFileSync(this.get_history_path(), JSON.stringify(this.history));
+            Deno.writeTextFileSync(this.get_history_path(history_name), JSON.stringify(this.history));
             console.log("历史记录保存完成");
         } catch (error) {
             console.log("保存历史记录失败:", error);
@@ -292,7 +312,7 @@ export default class DialogueEngine {
         let reasoning_content_history = ""; //推理内容
         const message = this.buildMessage(input);
         //await this.handleOpenAIRequest(message);
-        AiApiRequestManager.openAIRequest(message,model,
+        AiApiRequestManager.openAIRequest(message, model,
             (reasoning_content: string, content: string, end: boolean) => {
                 if (reasoning_content) {
                     this.handleReasoningContent(reasoning_content);

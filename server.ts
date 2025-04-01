@@ -93,7 +93,7 @@ router.get("/ws", async (ctx) => {
                     console.log("第一轮对话结束,记录对话历史");
                     let res_all = "";
                     //提示词
-                    const prompt = "请把之前的对话总结为一个简短的词语或者一个句子，不要包含任何特殊符号，十个字以内";
+                    const prompt = "请把之前的对话总结为一个简短的词语或者一个句子，不要包含任何标点符号，十个字以内";
                     AiApiRequestManager.openAIRequest(dialogueEngine.buildMessage(prompt),
                     "deepseek-v3",    
                     (_reasoning_content: string, content: string, end: boolean) => {

@@ -110,6 +110,7 @@ let selectedImage = "";
 
 //发送消息
 function sendMessage() {
+    current_status = "提问中"
     if (ws.readyState !== WebSocket.OPEN) {
         appendSystemMessage('连接已断开，正在重连...', 'system');
         connectWebSocket();
@@ -187,7 +188,7 @@ function sendImage(input, image) {
     }));
 
     // 显示用户消息
-    appendUserMessage("", image);
+    appendUserMessage(input, image);
     selectedImage = "";
     // 清空输入
     messageInput.value = '';
