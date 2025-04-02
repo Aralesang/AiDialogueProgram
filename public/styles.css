@@ -454,6 +454,7 @@ body {
     background: #ffffff;
     border-radius: 16px;
     box-shadow: 0 4px 12px var(--shadow-color);
+    position: relative;
 }
 
 .history-title {
@@ -470,12 +471,18 @@ body {
     padding: 1rem 1.5rem;
     background-color: var(--bg-color);
     border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     margin: 0 0.5rem;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+}
+
+.history-item span {
+    flex: 1;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .history-item:hover {
@@ -489,9 +496,72 @@ body {
     color: white;
 }
 
-.history-item::before {
-    content: "📄";
+.history-menu-button {
+    background: none;
+    border: none;
+    color: inherit;
     font-size: 1.2em;
+    cursor: pointer;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    opacity: 0.7;
+}
+
+.history-menu-button:hover {
+    opacity: 1;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.history-menu-button {
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 1.2em;
+    cursor: pointer;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    opacity: 0.7;
+}
+
+.history-menu-button:hover {
+    opacity: 1;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.history-submenu {
+    position: fixed;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    display: none;
+    z-index: 10000;
+    min-width: 120px;
+}
+
+.history-submenu.show {
+    display: block;
+}
+
+.submenu-option {
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    color: var(--text-color);
+    font-size: 14px;
+}
+
+.submenu-option:hover {
+    background-color: var(--bg-color);
+}
+
+.submenu-option:first-child {
+    border-radius: 8px 8px 0 0;
+}
+
+.submenu-option:last-child {
+    border-radius: 0 0 8px 8px;
 }
 
 @media (max-width: 768px) {
