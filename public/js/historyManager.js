@@ -1,5 +1,5 @@
 import { appendUserMessage, appendSystemMessage } from './messageHandlers.js';
-import { loadHistory } from './websocket.js';
+import { loadHistory,deleteHistory } from './websocket.js';
 
 const historyList = document.getElementById('historyList');
 
@@ -57,8 +57,18 @@ export function renderHistoryList(historyNames) {
         deleteOption.textContent = '🗑删除';
         deleteOption.addEventListener('click', (e) => {
             e.stopPropagation();
-            // TODO: 实现删除功能
-            console.log('删除:', name);
+            if (confirm(`确定要删除对话历史 "${name}" 吗？此操作不可恢复。`)) {
+                deleteHistory(name, localStorage.getItem('username'));
+                // 移除当前历史项
+                historyItem.remove();
+                // 关闭子菜单
+                submenu.classList.remove('show');
+                // 如果删除的是当前活动的对话，清空聊天容器
+                if (historyItem.classList.contains('active')) {
+                    const chatContainer = document.getElementById('chatContainer');
+                    chatContainer.innerHTML = '';
+                }
+            }
             submenu.classList.remove('show');
         });
         

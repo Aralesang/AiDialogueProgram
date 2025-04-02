@@ -221,6 +221,26 @@ router.get("/ws", async (ctx) => {
                         send_history_list(socket, data.username);
                     }
                     break;
+                case "delete_history":
+                    {
+                        console.log("删除历史记录", data.historyName);
+                        const success = context.dialogueEngine.historyManager.delete_history(data.historyName);
+                        if (success) {
+                            socket.send(JSON.stringify({
+                                type: "history_deleted",
+                                success: true,
+                                message: "历史记录已删除"
+                            }));
+                            // 刷新历史记录列表
+                            send_history_list(socket, data.username);
+                        } else {
+                            socket.send(JSON.stringify({
+                                type: "error",
+                                message: "删除历史记录失败"
+                            }));
+                        }
+                    }
+                    break;
             }
             // deno-lint-ignore no-explicit-any
         } catch (error: any) {

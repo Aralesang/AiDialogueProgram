@@ -85,4 +85,24 @@ export class HistoryManager {
     public setUserName(username: string) {
         this.username = username;
     }
+
+    /** 删除历史记录 */
+    public delete_history(history_name: string): boolean {
+        try {
+            const filePath = this.get_history_path(history_name);
+            if (existsSync(filePath)) {
+                Deno.removeSync(filePath);
+                if (this.historyFileName === history_name) {
+                    this.history = [];
+                    this.round = 0;
+                    this.historyFileName = "";
+                }
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.log("删除历史记录失败:", error);
+            return false;
+        }
+    }
 }

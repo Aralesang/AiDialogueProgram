@@ -79,6 +79,9 @@ export async function initializeWebSocket(username) {
                 case 'history_list':
                     renderHistoryList(data.historyNames);
                     break;
+                case 'history_deleted':
+                    appendSystemMessage(data.message, 'system');
+                    break;
                 case 'error':
                     appendSystemMessage('错误: ' + data.message, 'system');
                     break;
@@ -130,4 +133,12 @@ export function loadHistory(historyName, username) {
 
 export function isWebSocketOpen() {
     return ws && ws.readyState === WebSocket.OPEN;
+}
+
+export function deleteHistory(historyName, username) {
+    ws.send(JSON.stringify({
+        type: 'delete_history',
+        historyName: historyName,
+        username: username
+    }));
 }
