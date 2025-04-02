@@ -20,11 +20,12 @@ export async function initializeWebSocket(username) {
 
         ws.onopen = () => {
             console.log('WebSocket 连接已建立');
-            appendSystemMessage('系统已连接，可以开始对话了。', 'system');
-            //获取历史记录列表
-            setTimeout(() => {
-                getHistoryList(username);
-            }, 1000);
+            appendSystemMessage('正在连接到系统...', 'system');
+            // 立即发送登录消息
+            ws.send(JSON.stringify({
+                type: 'login',
+                username: username
+            }));
         };
 
         ws.onclose = () => {
@@ -40,6 +41,11 @@ export async function initializeWebSocket(username) {
             const data = JSON.parse(event.data);
 
             switch (data.type) {
+                case 'login_success':
+                    console.log('登录成功');
+                    appendSystemMessage('系统已连接，可以开始对话了。', 'system');
+                    getHistoryList(username);
+                    break;
                 case 'reasoning':
                     if (current_status != "推理中") {
                         current_status = "推理中";

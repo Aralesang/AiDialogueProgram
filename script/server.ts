@@ -167,6 +167,43 @@ router.get("/ws", async (ctx) => {
                         }));
                     }
                     break;
+                case "login":
+                    {
+                        const username = data.username;
+                        context.dialogueEngine.setUserName(username);
+                        
+                        // 创建用户数据文件
+                        const userDataPath = `./user_data/${username}.json`;
+                        if (!existsSync(userDataPath)) {
+                            // 初始化用户数据
+                            const initialUserData = {
+                                username: username,
+                                createdAt: new Date().toISOString(),
+                                lastLogin: new Date().toISOString(),
+                                settings: {}
+                            };
+                            
+                            await Deno.writeTextFile(
+                                userDataPath,
+                                JSON.stringify(initialUserData, null, 2)
+                            );
+                        } else {
+                            // 更新最后登录时间
+                            const userData = JSON.parse(await Deno.readTextFile(userDataPath));
+                            userData.lastLogin = new Date().toISOString();
+                            await Deno.writeTextFile(
+                                userDataPath,
+                                JSON.stringify(userData, null, 2)
+                            );
+                        }
+
+                        // 发送登录成功消息
+                        socket.send(JSON.stringify({
+                            type: "login_success",
+                            username: username
+                        }));
+                    }
+                    break;
                 case "history_list":
                     {
                         context.dialogueEngine.setUserName(data.username);
