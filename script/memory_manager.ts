@@ -1,7 +1,7 @@
 
 export class MemoryManager {
     private memory = "";
-    private exe_path = "..";
+    private exe_path = ".";
 
     /** 读取记忆 */
     public async load_memory(enable_memory: boolean) {

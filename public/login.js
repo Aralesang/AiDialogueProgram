@@ -1,5 +1,5 @@
 
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
+document.getElementById('loginForm').addEventListener('submit', (e) => {
     e.preventDefault();
     const username = document.getElementById('username').value.trim();
     
@@ -11,13 +11,13 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     // 保存用户名到 localStorage
     localStorage.setItem('username', username);
     // 跳转到主页
-    window.location.href = '/';
+    globalThis.location.href = '/';
 });
 
 // 检查是否已登录
-window.addEventListener('load', () => {
+globalThis.addEventListener('load', () => {
     const username = localStorage.getItem('username');
     if (username) {
-        window.location.href = '/';
+        globalThis.location.href = '/';
     }
 });

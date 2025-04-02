@@ -89,7 +89,7 @@ router.get("/ws", async (ctx) => {
                 socket.send(JSON.stringify({
                     type: 'chat_end'
                 }));
-                if (dialogueEngine.round == 1) {
+                if (dialogueEngine.historyManager.getRound() == 1) {
                     console.log("第一轮对话结束,记录对话历史");
                     let res_all = "";
                     //提示词
@@ -105,7 +105,7 @@ router.get("/ws", async (ctx) => {
                                 console.log("对话总结结束");
                                 dialogueEngine.save_history(res_all);
                                 //通知客户端刷新历史记录
-                                send_history_list(socket, dialogueEngine.username);
+                                send_history_list(socket, dialogueEngine.getUserName());
                             }
                         });
                 }
@@ -153,7 +153,7 @@ router.get("/ws", async (ctx) => {
                         await context.dialogueEngine.load_history(data.historyName);
                         socket.send(JSON.stringify({
                             type: "history_loaded",
-                            history: context.dialogueEngine.history,
+                            history: context.dialogueEngine.historyManager.getHistory(),
                             username: data.username,
                         }));
                     }
@@ -169,7 +169,7 @@ router.get("/ws", async (ctx) => {
                     break;
                 case "history_list":
                     {
-                        context.dialogueEngine.username = data.username;
+                        context.dialogueEngine.setUserName(data.username);
                         send_history_list(socket, data.username);
                     }
                     break;

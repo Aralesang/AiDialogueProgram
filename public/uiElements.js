@@ -4,7 +4,6 @@ import { getSelectedImage, clearSelectedImage } from './imageUpload.js';
 
 const messageInput = document.getElementById('messageInput');
 const sendButton = document.getElementById('sendButton');
-
 // 中断处理函数
 function handleInterrupt() {
     console.log("中断处理函数被调用");
@@ -62,7 +61,9 @@ export function setupMessageHandling(username) {
 }
 
 // 初始化UI
-export function initializeUI() {
+export function initializeUI(user_name) {
+    // 设置用户名
+    document.getElementById('username').textContent = user_name;
     // 初始化时自动滚动到底部
     const chatContainer = document.getElementById('chatContainer');
     chatContainer.scrollTop = chatContainer.scrollHeight;

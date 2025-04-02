@@ -60,7 +60,7 @@ export async function initializeWebSocket(username) {
                     break;
                 case 'chat_end':
                     if (current_status == "回复中") {
-                        endResponse();
+                        endResponse(username);
                     }
                     break;
                 case 'history_loaded':

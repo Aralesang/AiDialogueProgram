@@ -2,6 +2,7 @@
 const chatContainer = document.getElementById('chatContainer');
 const messageInput = document.getElementById('messageInput');
 const sendButton = document.getElementById('sendButton');
+import { setupMessageHandling } from './uiElements.js';
 
 // 当前系统回复的DOM元素
 let currentResponseMessage = null;
@@ -177,7 +178,7 @@ function startNewResponse() {
 }
 
 // 结束系统回复
-export function endResponse() {
+export function endResponse(user_name) {
     if (currentResponseMessage) {
         // 移除打字动画
         const typingContainer = currentResponseMessage.querySelector('.typing-container');
@@ -195,7 +196,7 @@ export function endResponse() {
     // 恢复发送按钮和输入框状态
     sendButton.textContent = '发送 🚀';
     sendButton.classList.remove('interrupt-button');
-    sendButton.onclick = sendMessage;
+    sendButton.onclick = setupMessageHandling(user_name);
     messageInput.disabled = false;
     messageInput.placeholder = '输入你的问题...';
 

@@ -4,7 +4,6 @@ import { AiApiRequestManager } from './AIApiRequestManager.ts';
 import { HistoryManager } from "./history_manager.ts";
 import { MemoryManager } from "./memory_manager.ts";
 import { ImageHandler } from "./image_handler.ts";
-import { History } from "./types.ts";
 
 export default class DialogueEngine {
     private reasoningCallback: ((content: string) => void) | null = null;
@@ -12,10 +11,11 @@ export default class DialogueEngine {
     public onDialogueComplete: (() => void) | null = null;
     public isReasoningMode = false;
     
-    private historyManager: HistoryManager;
-    private memoryManager: MemoryManager;
+    public historyManager: HistoryManager;
+    public memoryManager: MemoryManager;
     private imageHandler: ImageHandler;
     public system_message = "";
+    private username = "";
 
     constructor(
         reasoningCallback: (content: string) => void,
@@ -83,7 +83,7 @@ export default class DialogueEngine {
                 if (content) {
                     this.system_message += content;
                     if (this.answerCallback) {
-                        console.log(content);
+                        //console.log(content);
                         this.answerCallback(content);
                     }
                 }
@@ -109,5 +109,14 @@ export default class DialogueEngine {
 
     public save_history(history_name: string) {
         this.historyManager.save_history(history_name);
+    }
+
+    public getUserName(): string {
+        return this.username;
+    }
+
+    public setUserName(username: string) {
+        this.username = username;
+        this.historyManager.setUserName(username);
     }
 }

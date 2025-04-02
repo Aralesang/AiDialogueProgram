@@ -6,12 +6,9 @@ export class HistoryManager {
     private history: History[] = [];
     private historyFileName = "";
     private round = 0;
-    private username = "default_user";
-    private exe_path = "..";
+    private username = "";
 
-    constructor(username = "default_user") {
-        this.username = username;
-    }
+    private exe_path = ".";
 
     /** 获取历史记录文件路径 */
     private get_history_path(file_name: string) {
@@ -79,5 +76,13 @@ export class HistoryManager {
 
     public incrementRound() {
         this.round++;
+    }
+
+    public getUserName(): string {
+        return this.username;
+    }
+
+    public setUserName(username: string) {
+        this.username = username;
     }
 }
