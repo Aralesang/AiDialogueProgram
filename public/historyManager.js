@@ -86,7 +86,7 @@ export function renderHistoryList(historyNames) {
             
             // 计算水平位置
             let left;
-            if (rect.right + menuWidth + 5 > window.innerWidth) {
+            if (rect.right + menuWidth + 5 > globalThis.innerWidth) {
                 // 如果右侧空间不足，显示在左侧
                 left = rect.left - menuWidth - 5;
             } else {
@@ -97,8 +97,8 @@ export function renderHistoryList(historyNames) {
             // 计算垂直位置，确保子菜单不会超出视窗底部
             let top = rect.top;
             const menuHeight = 76; // 预估子菜单高度
-            if (top + menuHeight > window.innerHeight) {
-                top = window.innerHeight - menuHeight - 5;
+            if (top + menuHeight > globalThis.innerHeight) {
+                top = globalThis.innerHeight - menuHeight - 5;
             }
             
             // 应用位置
@@ -124,7 +124,7 @@ export function renderHistoryList(historyNames) {
         document.addEventListener('click', closeSubmenu);
 
         // 添加窗口大小改变时关闭子菜单的处理
-        window.addEventListener('resize', () => {
+        globalThis.addEventListener('resize', () => {
             submenu.classList.remove('show');
         });
         
