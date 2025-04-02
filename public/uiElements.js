@@ -61,9 +61,7 @@ export function setupMessageHandling(username) {
 }
 
 // 初始化UI
-export function initializeUI(user_name) {
-    // 设置用户名
-    document.getElementById('username').textContent = user_name;
+export function initializeUI() {
     // 初始化时自动滚动到底部
     const chatContainer = document.getElementById('chatContainer');
     chatContainer.scrollTop = chatContainer.scrollHeight;

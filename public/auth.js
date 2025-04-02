@@ -9,7 +9,8 @@ export function checkLoginStatus() {
 
 // 更新用户名显示
 export function updateUsernameDisplay(username) {
-    document.getElementById('username').textContent = `👋 ${username}`;
+    const user_name_display = document.getElementById('username');
+    user_name_display.textContent = `${username}`;
 }
 
 // 设置登出功能
