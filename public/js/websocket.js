@@ -30,6 +30,7 @@ export async function initializeWebSocket(username) {
 
         ws.onclose = () => {
             console.log('WebSocket 连接已关闭');
+            appendSystemMessage('连接已断开，请刷新页面重试。', 'system');
         };
 
         ws.onerror = (error) => {

@@ -184,7 +184,7 @@ router.get("/ws", async (ctx) => {
                         context.dialogueEngine.setUserName(username);
                         
                         // 创建用户数据文件
-                        const userDataPath = `./user_data/${username}.json`;
+                        const userDataPath = `./userdata/${username}.json`;
                         if (!existsSync(userDataPath)) {
                             // 初始化用户数据
                             const initialUserData = {
