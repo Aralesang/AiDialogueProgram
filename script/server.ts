@@ -241,6 +241,56 @@ router.get("/ws", async (ctx) => {
                         }
                     }
                     break;
+                case "pin_history":
+                    {
+                        console.log("置顶历史记录", data.historyName);
+                        const userDataPath = `./userdata/${data.username}.json`;
+                        try {
+                            const userData = JSON.parse(await Deno.readTextFile(userDataPath));
+                            // 初始化pinnedHistories数组（如果不存在）
+                            if (!userData.pinnedHistories) {
+                                userData.pinnedHistories = [];
+                            }
+                            
+                            // 检查是否已经置顶
+                            const isPinned = userData.pinnedHistories.includes(data.historyName);
+                            if (isPinned) {
+                                // 如果已经置顶，则取消置顶
+                                userData.pinnedHistories = userData.pinnedHistories.filter(
+                                    (name: string) => name !== data.historyName
+                                );
+                                socket.send(JSON.stringify({
+                                    type: "history_unpinned",
+                                    success: true,
+                                    message: "已取消置顶"
+                                }));
+                            } else {
+                                // 如果未置顶，则添加到置顶列表
+                                userData.pinnedHistories.push(data.historyName);
+                                socket.send(JSON.stringify({
+                                    type: "history_pinned",
+                                    success: true,
+                                    message: "已置顶"
+                                }));
+                            }
+                            
+                            // 保存更新后的用户数据
+                            await Deno.writeTextFile(
+                                userDataPath,
+                                JSON.stringify(userData, null, 2)
+                            );
+                            
+                            // 刷新历史记录列表
+                            send_history_list(socket, data.username);
+                        } catch (error) {
+                            console.error("处理置顶操作失败:", error);
+                            socket.send(JSON.stringify({
+                                type: "error",
+                                message: "处理置顶操作失败"
+                            }));
+                        }
+                    }
+                    break;
             }
             // deno-lint-ignore no-explicit-any
         } catch (error: any) {
@@ -260,12 +310,24 @@ router.get("/ws", async (ctx) => {
     return ctx.response;
 });
 
-function send_history_list(socket: WebSocket, username: string) {
+async function send_history_list(socket: WebSocket, username: string) {
     console.log("获取历史记录列表");
     //检查是否存在data.username的文件夹
     if (!existsSync(`./history/${username}`)) {
         Deno.mkdirSync(`./history/${username}`);
     }
+    
+    // 获取用户数据以检查置顶历史记录
+    const userDataPath = `./userdata/${username}.json`;
+    let pinnedHistories: string[] = [];
+    try {
+        const userData = JSON.parse(await Deno.readTextFile(userDataPath));
+        pinnedHistories = userData.pinnedHistories || [];
+    } catch (error) {
+        console.error("读取用户数据失败:", error);
+        pinnedHistories = [];
+    }
+
     //获取history文件夹下所有的文件名称
     const historyList = Deno.readDirSync(`./history/${username}`);
     const historyNames: string[] = [];
@@ -277,9 +339,11 @@ function send_history_list(socket: WebSocket, username: string) {
         }
         historyNames.push(name);
     });
+
     socket.send(JSON.stringify({
         type: "history_list",
         historyNames: historyNames,
+        pinnedHistories: pinnedHistories
     }));
 }
 

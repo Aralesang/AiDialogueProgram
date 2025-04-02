@@ -1,10 +1,10 @@
 import { appendUserMessage, appendSystemMessage } from './messageHandlers.js';
-import { loadHistory,deleteHistory } from './websocket.js';
+import { loadHistory,deleteHistory,pinHistory } from './websocket.js';
 
 const historyList = document.getElementById('historyList');
 
 // 渲染历史记录列表
-export function renderHistoryList(historyNames) {
+export function renderHistoryList(historyNames, pinnedHistories = []) {
     // 保留标题元素
     const titleElement = historyList.querySelector('.history-title');
     historyList.innerHTML = '';
@@ -12,7 +12,16 @@ export function renderHistoryList(historyNames) {
         historyList.appendChild(titleElement);
     }
 
-    historyNames.forEach(name => {
+    // 对历史记录进行排序：置顶的排在前面
+    const sortedHistoryNames = [...historyNames].sort((a, b) => {
+        const aIsPinned = pinnedHistories.includes(a);
+        const bIsPinned = pinnedHistories.includes(b);
+        if (aIsPinned && !bIsPinned) return -1;
+        if (!aIsPinned && bIsPinned) return 1;
+        return 0;
+    });
+
+    sortedHistoryNames.forEach(name => {
         const historyItem = document.createElement('div');
         historyItem.className = 'history-item';
         
@@ -40,16 +49,28 @@ export function renderHistoryList(historyNames) {
         submenu.className = 'history-submenu';
         document.body.appendChild(submenu);
         
+        // 检查是否已置顶
+        const isPinned = pinnedHistories.includes(name);
+        
         // 创建置顶选项
         const pinOption = document.createElement('div');
         pinOption.className = 'submenu-option';
-        pinOption.textContent = '📌置顶';
+        pinOption.textContent = isPinned ? '📍取消置顶' : '📌置顶';
         pinOption.addEventListener('click', (e) => {
             e.stopPropagation();
-            // TODO: 实现置顶功能
-            console.log('置顶:', name);
+            pinHistory(name, localStorage.getItem('username'));
             submenu.classList.remove('show');
         });
+
+        // 如果已置顶，添加视觉指示
+        if (isPinned) {
+            const pinIndicator = document.createElement('span');
+            pinIndicator.className = 'pin-indicator';
+            pinIndicator.textContent = '📍';
+            pinIndicator.style.marginRight = '5px';
+            textContainer.insertBefore(pinIndicator, textContainer.firstChild);
+            historyItem.classList.add('pinned');
+        }
         
         // 创建删除选项
         const deleteOption = document.createElement('div');

@@ -77,9 +77,13 @@ export async function initializeWebSocket(username) {
                     appendSystemMessage('对话历史已保存。', 'system');
                     break;
                 case 'history_list':
-                    renderHistoryList(data.historyNames);
+                    renderHistoryList(data.historyNames, data.pinnedHistories);
                     break;
                 case 'history_deleted':
+                    appendSystemMessage(data.message, 'system');
+                    break;
+                case 'history_pinned':
+                case 'history_unpinned':
                     appendSystemMessage(data.message, 'system');
                     break;
                 case 'error':
@@ -138,6 +142,14 @@ export function isWebSocketOpen() {
 export function deleteHistory(historyName, username) {
     ws.send(JSON.stringify({
         type: 'delete_history',
+        historyName: historyName,
+        username: username
+    }));
+}
+
+export function pinHistory(historyName, username) {
+    ws.send(JSON.stringify({
+        type: 'pin_history',
         historyName: historyName,
         username: username
     }));
