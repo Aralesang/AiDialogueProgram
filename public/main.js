@@ -109,6 +109,12 @@ const historyList = document.getElementById('historyList');
 let selectedImage = "";
 
 //发送消息
+// 中断处理函数
+function handleInterrupt() {
+    // 该函数的具体实现将由用户完成
+    console.log("中断处理函数被调用");
+}
+
 function sendMessage() {
     current_status = "提问中"
     if (ws.readyState !== WebSocket.OPEN) {
@@ -136,11 +142,12 @@ function sendTextMessage(input) {
     const message = input;
     if (!message) return;
 
-    // 禁用发送按钮和输入框
-    sendButton.disabled = true;
-    sendButton.textContent = '等待回复...';
+    // 禁用输入框，将发送按钮改为中断按钮
     messageInput.disabled = true;
     messageInput.placeholder = '等待回复...';
+    sendButton.textContent = '中断 ⏹️';
+    sendButton.classList.add('interrupt-button');
+    sendButton.onclick = handleInterrupt;
 
     // 发送消息到服务器
     const selectedModel = document.getElementById('modelSelect').value;
@@ -169,11 +176,12 @@ function getHistoryList() {
 }
 
 function sendImage(input, image) {
-    // 禁用发送按钮和输入框
-    sendButton.disabled = true;
-    sendButton.textContent = '等待回复...';
+    // 禁用输入框，将发送按钮改为中断按钮
     messageInput.disabled = true;
     messageInput.placeholder = '等待回复...';
+    sendButton.textContent = '中断 ⏹️';
+    sendButton.classList.add('interrupt-button');
+    sendButton.onclick = handleInterrupt;
     if (input == "") {
         input = "首先请告诉我你看到了什么,然后详细描述图片上的内容，如果图片的内容关联到了某些影视,文学,电子游戏等其他可能的内容,也请告知";
     }
@@ -497,9 +505,10 @@ function endResponse() {
         currentResponseMessage.querySelector('.system-content').appendChild(completionMark);
     }
 
-    // 启用发送按钮和输入框
-    sendButton.disabled = false;
+    // 恢复发送按钮和输入框状态
     sendButton.textContent = '发送 🚀';
+    sendButton.classList.remove('interrupt-button');
+    sendButton.onclick = sendMessage;
     messageInput.disabled = false;
     messageInput.placeholder = '输入你的问题...';
 
