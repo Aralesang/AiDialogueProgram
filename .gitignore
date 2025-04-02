@@ -29,3 +29,4 @@ node_modules/
 # information for Eclipse / Flash Builder.
 public/config.json
 history/*
+user_data/*

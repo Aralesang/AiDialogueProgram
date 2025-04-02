@@ -2,7 +2,7 @@
 export function checkLoginStatus() {
     const username = localStorage.getItem('username');
     if (!username) {
-        globalThis.location.href = '/login.html';
+        globalThis.location.href = '/html/login.html';
     }
     return username;
 }
@@ -17,6 +17,6 @@ export function updateUsernameDisplay(username) {
 export function setupLogout() {
     document.getElementById('logoutButton').addEventListener('click', () => {
         localStorage.removeItem('username');
-        globalThis.location.href = '/login.html';
+        globalThis.location.href = '/html/login.html';
     });
 }

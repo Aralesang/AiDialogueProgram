@@ -170,6 +170,17 @@ router.get("/ws", async (ctx) => {
                 case "login":
                     {
                         const username = data.username;
+                        
+                        // 验证用户名格式
+                        const usernameRegex = /^[a-zA-Z0-9\u4e00-\u9fa5]+$/;
+                        if (!usernameRegex.test(username)) {
+                            socket.send(JSON.stringify({
+                                type: "error",
+                                message: "用户名只能包含字母、数字和中文字符"
+                            }));
+                            return;
+                        }
+
                         context.dialogueEngine.setUserName(username);
                         
                         // 创建用户数据文件
