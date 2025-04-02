@@ -1,0 +1,114 @@
+/* 聊天容器 */
+.chat-container {
+    flex: 1;
+    padding: 2rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* 消息样式 */
+.message {
+    max-width: 80%;
+    padding: 1rem 1.5rem;
+    border-radius: 20px;
+    position: relative;
+    animation: messagePopIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.user-message {
+    background-color: var(--primary-color);
+    color: white;
+    margin-left: auto;
+    border-radius: 20px 20px 4px 20px;
+    box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+.system-message {
+    background-color: #ffffff;
+    color: var(--text-color);
+    margin-right: auto;
+    border-radius: 20px 20px 20px 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* 系统消息内容 */
+.system-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.ai-icon {
+    font-size: 1.5em;
+    min-width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--primary-light);
+    border-radius: 50%;
+    color: white;
+    animation: iconPop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* 消息中的图片 */
+.message img {
+    max-width: 100%;
+    border-radius: 16px;
+    margin-top: 1rem;
+    box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+/* 系统通知 */
+.system-notification {
+    color: var(--primary-color);
+    text-align: center;
+    padding: 1rem;
+    margin: 1rem auto;
+    font-size: 0.95em;
+    font-weight: 500;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px var(--shadow-color);
+    max-width: 80%;
+    animation: notificationSlide 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 打字动画 */
+.typing-container {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 0.5rem;
+}
+
+.typing-dots {
+    display: inline-flex;
+    gap: 4px;
+}
+
+.typing-dots span {
+    width: 6px;
+    height: 6px;
+    background-color: var(--primary-color);
+    border-radius: 50%;
+    animation: typingBounce 1.4s infinite ease-in-out;
+}
+
+.typing-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+/* 完成标记 */
+.completion-mark {
+    margin-left: 0.5rem;
+    color: var(--primary-color);
+    font-size: 1.2em;
+    opacity: 0;
+    animation: completionPop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
