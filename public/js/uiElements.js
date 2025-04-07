@@ -1,4 +1,4 @@
-import { sendMessage, isWebSocketOpen, initializeWebSocket } from './websocket.js';
+import { sendMessage, isWebSocketOpen, initializeWebSocket, setTemporaryMode } from './websocket.js';
 import { appendUserMessage, appendSystemMessage } from './messageHandlers.js';
 import { getSelectedImage, clearSelectedImage } from './imageUpload.js';
 
@@ -65,4 +65,28 @@ export function initializeUI() {
     // 初始化时自动滚动到底部
     const chatContainer = document.getElementById('chatContainer');
     chatContainer.scrollTop = chatContainer.scrollHeight;
+
+    // 初始化临时对话开关
+    initializeTemporaryModeToggle();
+}
+
+// 初始化临时对话开关
+function initializeTemporaryModeToggle() {
+    const temporaryModeToggle = document.getElementById('temporaryModeToggle');
+    const chatContainer = document.getElementById('chatContainer');
+
+    temporaryModeToggle.addEventListener('change', (e) => {
+        const isTemporary = e.target.checked;
+        setTemporaryMode(isTemporary);
+        
+        // 清空当前对话内容
+        chatContainer.innerHTML = '';
+        
+        // 添加模式切换提示
+        const modeMessage = isTemporary ? 
+            '已切换到临时对话模式，本次对话不会被记录。' : 
+            '已切换到普通对话模式，对话将被正常记录。';
+        
+        appendSystemMessage(modeMessage, 'system');
+    });
 }

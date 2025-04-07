@@ -7,6 +7,7 @@ export class HistoryManager {
     private historyFileName = "";
     private round = 0;
     private username = "";
+    private isTemporary = false;
 
     private exe_path = ".";
 
@@ -27,11 +28,28 @@ export class HistoryManager {
             content: system_message,
             reasoning_content: reasoning
         }
+        
+        // 在临时模式下只更新内存中的历史记录
         this.history.push(user);
         this.history.push(system);
-        if (this.historyFileName) {
+        
+        // 只有在非临时模式下才写入文件
+        if (this.historyFileName && !this.isTemporary) {
             Deno.writeTextFileSync(this.get_history_path(this.historyFileName), JSON.stringify(this.history));
         }
+    }
+
+    /** 设置临时对话模式 */
+    public setTemporaryMode(isTemporary: boolean) {
+        this.isTemporary = isTemporary;
+        // 切换模式时清空历史记录
+        this.history = [];
+        this.round = 0;
+    }
+
+    /** 获取临时对话模式状态 */
+    public getTemporaryMode(): boolean {
+        return this.isTemporary;
     }
 
     /** 读取历史记录 */

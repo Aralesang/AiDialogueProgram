@@ -107,6 +107,20 @@ export function getHistoryList(username) {
     }));
 }
 
+let isTemporaryMode = false;
+
+export function setTemporaryMode(temporary) {
+    isTemporaryMode = temporary;
+    ws.send(JSON.stringify({
+        type: 'set_temporary_mode',
+        isTemporary: temporary
+    }));
+}
+
+export function isInTemporaryMode() {
+    return isTemporaryMode;
+}
+
 export function sendMessage(message, image, username, model) {
     if (image) {
         ws.send(JSON.stringify({
@@ -114,7 +128,8 @@ export function sendMessage(message, image, username, model) {
             message: message || "首先请告诉我你看到了什么,然后详细描述图片上的内容，如果图片的内容关联到了某些影视,文学,电子游戏等其他可能的内容,也请告知",
             image: image,
             username: username,
-            model: model
+            model: model,
+            isTemporary: isTemporaryMode
         }));
     } else {
         ws.send(JSON.stringify({
@@ -122,7 +137,8 @@ export function sendMessage(message, image, username, model) {
             message: message,
             image: "",
             username: username,
-            model: model
+            model: model,
+            isTemporary: isTemporaryMode
         }));
     }
 }

@@ -89,7 +89,7 @@ router.get("/ws", async (ctx) => {
                 socket.send(JSON.stringify({
                     type: 'chat_end'
                 }));
-                if (dialogueEngine.historyManager.getRound() == 1) {
+                if (dialogueEngine.historyManager.getRound() == 1 && !dialogueEngine.isTemporaryMode) {
                     console.log("第一轮对话结束,记录对话历史");
                     let res_all = "";
                     //提示词
@@ -289,6 +289,12 @@ router.get("/ws", async (ctx) => {
                                 message: "处理置顶操作失败"
                             }));
                         }
+                    }
+                    break;
+                case "set_temporary_mode":
+                    {
+                        console.log("进入临时对话模式");
+                        dialogueEngine.isTemporaryMode = true;
                     }
                     break;
             }
