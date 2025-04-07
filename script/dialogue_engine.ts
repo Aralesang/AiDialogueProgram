@@ -11,7 +11,7 @@ export default class DialogueEngine {
     public onDialogueComplete: (() => void) | null = null;
     public isReasoningMode = false;
     public isTemporaryMode = false; // 临时对话模式开关
-    
+
     public historyManager: HistoryManager;
     public memoryManager: MemoryManager;
     private imageHandler: ImageHandler;
@@ -60,9 +60,7 @@ export default class DialogueEngine {
         await new Promise(resolve => setTimeout(resolve, 100));
 
         this.historyManager.incrementRound();
-        if (!this.isTemporaryMode) {
-            this.historyManager.update_history(input, this.system_message, "", url);
-        }
+        this.historyManager.update_history(input, this.system_message, "", url);
 
         // 通知对话完成
         if (this.onDialogueComplete) {
@@ -92,9 +90,7 @@ export default class DialogueEngine {
                 }
                 if (end) {
                     this.historyManager.incrementRound();
-                    if (!this.isTemporaryMode) {
-                        this.historyManager.update_history(input, this.system_message, reasoning_content_history);
-                    }
+                    this.historyManager.update_history(input, this.system_message, reasoning_content_history);
                     if (this.onDialogueComplete) {
                         this.onDialogueComplete();
                     }

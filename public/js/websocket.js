@@ -50,9 +50,8 @@ export async function initializeWebSocket(username) {
                 case 'reasoning':
                     if (current_status != "推理中") {
                         current_status = "推理中";
-                    } else {
-                        appendReasoningMessage(data.message);
                     }
+                    appendReasoningMessage(data.message);
                     break;
                 case 'response':
                     if (current_status == "推理中") {
